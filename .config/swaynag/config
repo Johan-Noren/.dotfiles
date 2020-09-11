@@ -1,0 +1,42 @@
+# At the top of the config file, swaynag options can be set using the format long-option=value.  These will be used as default values if swaynag is not given the option. This can be useful for setting a preferred font, output, and edge.  
+#
+# Below the options, custom types may be defined. To define a type, use the following format:
+#
+# [name-of-type]
+# option=value
+# 
+# All colors may be given in the form RRGGBB or RRGGBBAA. The following colors can be set:
+# 
+# EXAMPLE
+# font=Monospace 12
+# edge=bottom
+# 
+# [green]
+# edge=top
+# background=00AA00
+# border=006600
+# border-bottom=004400
+# text=FFFFFF
+# button-background=00CC00
+# message-padding=10
+##
+
+
+[error]
+font='DejaVu Sans Mono' 11
+background=cc241d
+border=cc241d
+# border-bottom=<color>
+# button-background=<color>
+# text=<color>
+# border-bottom-size=<size>
+# message-padding=<padding>
+# details-border-size=<size>
+# button-border-size=<size>
+# button-gap=<gap>
+# button-dismiss-gap=<gap>
+# button-margin-right=<margin>
+# button-padding=<padding>
+edge=top
+#|bottom
+# output=<output>

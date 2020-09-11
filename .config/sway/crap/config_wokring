@@ -1,0 +1,396 @@
+exec systemctl --user import-environment SWAYSOCK \
+					 DISPLAY \
+					 I3SOCK \
+					 WAYLAND_DISPLAY \
+					 XCURSOR_SIZE \
+					 XCURSOR_THEME ; systemctl --user start sway-session-target
+            
+
+
+exec systemd-notify --ready
+
+set $mod Mod4
+
+set $default_font_name  'DejaVu Sans'
+set $default_font_size  11
+
+font $default_font_name $default_font_size
+
+## STARTUPS ########################################################################################
+#exec udiskie --no-notify
+#exec mako
+#exec pulseaudio --daemonize
+#exec ~/.local/bin/notify_when_upgradable.py
+
+
+
+## GTK3-SETTINGS ###################################################################################
+
+set $gnome-schema org.gnome.desktop.interface
+
+exec_always 
+    {
+        gsettings set $gnome-schema gtk-theme 'Adwaita:dark'
+        #gsettings set $gnome-schema icon-theme 'Your icon theme'
+        gsettings set $gnome-schema cursor-theme 'Adwaita'
+    }
+
+## OUTPUTS #########################################################################################
+
+# MBP resolutions are 1920x1200 1680x1050 1280x800 1024x640
+output eDP-1 resolution 2560x1600 position 0,0 scale 1.25
+
+
+## INPUTS ##########################################################################################
+input "1452:627:bcm5974" {
+    tap disabled
+    natural_scroll enabled
+    dwt enabled
+}
+
+input "1452:627:Apple_Inc._Apple_Internal_Keyboard_/_Trackpad" {
+    xkb_layout se
+    xkb_variant mac
+    xkb_options compose:rwin
+}
+
+# seatsetup
+seat seat0 attach *
+seat seat0 hide_cursor 3000
+seat seat0 xcursor_theme Adwaita 24
+
+#
+# COLORS
+#
+
+# SWAY
+set $style_default_bg                #1e1e1e
+set $style_default_text              #a7a7a7
+
+set $c_focused_border                #4c7899
+set $c_focused_bg                    #285577
+set $c_focused_text                  $style_default_text
+set $c_focused_indicator             $c_focused_border
+set $c_focused_cborder               $c_focused_border
+
+set $c_unfocused_border              #333333
+set $c_unfocused_bg                  #222222
+set $c_unfocused_text                $style_default_text
+set $c_unfocused_indicator           $c_unfocused_border
+set $c_unfocused_cborder             $c_unfocused_border
+
+set $c_focused_inactive_border       $c_unfocused_border
+set $c_focused_inactive_bg           $c_unfocused_bg
+set $c_focused_inactive_text         $style_default_text
+set $c_focused_inactive_indicator    $c_focused_inactive_border
+set $c_focused_inactive_cborder      $c_focused_inactive_border
+
+set $c_urgent_border                 #2f343a
+set $c_urgent_bg                     #900000
+set $c_urgent_text                   $style_default_text
+set $c_urgent_indicator              $c_urgent_border
+set $c_urgent_cborder                $c_urgent_border
+
+# SWAYBAR
+set $bar_statusline 	             $style_default_text
+set $bar_background	                 #00000000
+set $bar_separator                   $bar_background
+
+set $bar_focused_border              $c_focused_border
+set $bar_focused_bg                  $c_focused_bg
+set $bar_focused_text                $c_focused_text
+
+set $bar_active_border               $bar_focused_border
+set $bar_active_bg                   $bar_focused_bg
+set $bar_active_text                 $bar_focused_text
+
+set $bar_inactive_border             $c_unfocused_border
+set $bar_inactive_bg                 $c_unfocused_bg
+set $bar_inactive_text               $c_unfocused_text
+
+set $bar_urgent_border               $c_urgent_border 
+set $bar_urgent_bg                   $c_urgent_bg
+set $bar_urgent_text                 $c_urgent_text
+
+# BEMENU
+set $bmenu_bg                        #a7a7a7
+set $bmenu_text                      $style_default_bg
+set $bmenu_title_bg                  $bmenu_bg
+set $bmenu_title_text                $bmenu_text
+set $bmenu_filter_bg                 $bmenu_bg
+set $bmenu_filter_text               $bmenu_text
+set $bmenu_normal_bg                 $bmenu_bg
+set $bmenu_normal_text               $bmenu_text
+set $bmenu_highlight_bg              $bmenu_bg
+set $bmenu_highlight_text            $bmenu_text
+set $bmenu_selected_bg               $bmenu_bg
+set $bmenu_selected_text             $bmenu_text
+set $bmenu_scrollbar_bg              $bmenu_bg
+set $bmenu_scrollbar_text            $bmenu_text
+
+## WINDOW SETTINGS #################################################################################
+#default_border normal 1
+gaps inner 10
+gaps outer 0
+output "*" background /home/f161/.bg.jpg fill 
+#output "*" background #282828 solid_color 
+
+# Colors (remember #16181c)
+client.focused           $c_focused_border           $c_focused_bg           $c_focused_text           $c_focused_indicator           $c_focused_cborder
+client.focused_inactive  $c_focused_inactive_border  $c_focused_inactive_bg  $c_focused_inactive_text  $c_focused_inactive_indicator  $c_focused_inactive_cborder
+client.unfocused         $c_unfocused_border         $c_unfocused_bg         $c_unfocused_text         $c_unfocused_indicator         $c_unfocused_cborder
+client.urgent            $c_urgent_border            $c_urgent_bg            $c_urgent_text            $c_urgent_indicator            $c_urgent_cborder
+
+
+## INDIVIDUAL APP SETTINGS #########################################################################
+for_window [app_id="firefox"] inhibit_idle fullscreen 
+for_window [app_id="firefox"] border pixel 1
+for_window [app_id="Spotify"] border pixel 1
+
+## BAR SETUP #######################################################################################
+
+bar { 
+    font $default_font_name $default_font_size
+    workspace_buttons no
+    position bottom
+    pango_markup enabled
+    height 35
+    separator_symbol ""
+    status_edge_padding 7
+    status_padding 0
+    swaybar_command swaybar
+    status_command /home/f161/.local/bin/swaybar_helper.sh
+    #status_command /home/f161/.local/bin/sb_engine.py
+    gaps 0 
+    colors {
+    	statusline $bar_statusline
+    	background $bar_background
+        separator  $bar_separator
+
+                           #BORDER               #BG               #TEXT
+        focused_workspace  $bar_focused_border   $bar_focused_bg   $bar_focused_text  
+        active_workspace   $bar_active_border    $bar_active_bg    $bar_active_text
+        inactive_workspace $bar_inactive_border  $bar_inactive_bg  $bar_inactive_text
+        urgent_workspace   $bar_urgent_border    $bar_urgent_bg    $bar_urgent_text
+    }
+}
+
+
+# 100% — FF 95% — F2 90% — E6 85% — D9 80% — CC 75% — BF 70% — B3 65% — A6 60% — 99 55% — 8C 50% — 80 45% — 73 40% — 66 35% — 59 30% — 4D 25% — 40 20% — 33 15% — 26 10% — 1A 5% — 0D 0% — 00 
+
+
+## LAUNCHER ########################################################################################
+
+
+# defines the font to be used ('name [size]'). 
+set $bmenu_font    $default_font_name $default_font_size
+set $bmenu_prompt  " "                        
+
+
+## INCLUDE XDG-FILES ###############################################################################
+
+
+bindsym $mod+d exec bemenu-run \
+                        --fn $bmenu_font \
+                        --prompt $bmenu_prompt \
+                        --tb "$bmenu_title_bg" \
+                        --tf "$bmenu_title_text" \
+                        --fb "$bmenu_filter_bg" \
+                        --ff "$bmenu_filter_text" \
+                        --nb "$bmenu_normal_bg" \
+                        --nf "$bmenu_normal_text" \
+                        --hb "$bmenu_highlight_bg" \
+                        --hf "$bmenu_highlight_text" \
+                        --sb "$bmenu_selected_bg" \
+                        --sf "$bmenu_selected_text" \
+                        --scb "$bmenu_scrollbar_bg" \
+                        --scf "$bmenu_scrollbar_text"
+
+
+## KEYBINDINGS #####################################################################################
+set $left h
+set $down j
+set $up k
+set $right l
+
+
+# custom stuff
+bindsym $mod+escape exec '/bin/makoctl dismiss -a'
+
+# Screengrab
+bindsym $mod+ctrl+shift+g exec grim ~/Downloads/$(date +'screengrab_%Y%m%d-%H%M%S.png')
+bindsym $mod+g exec grim -g "$(slurp)" - | wl-copy
+bindsym $mod+shift+g exec grim -g "$(slurp)" ~/Downloads/$(date +'screengrab_%Y%m%d-%H%M%S.png')
+
+# Screenrecording
+#bindsym $mod+ctrl+shift+m exec wf-recorder -f ~/Downloads/$(date +'recording_%Y%m%d-%H%M%S.mp4')
+#bindsym $mod+shift+m exec wf-recorder -g "$(slurp)" -f ~/Downloads/$(date +'recording_%Y%m%d-%H%M%S.mp4')
+
+bindsym $mod+shift+m exec 'pgrep wf-recorder && killall -s SIGINT wf-recorder || wf-recorder -c gif -g "$(slurp)" -f ~/Downloads/recording_$(date +"%Y%m%d_%H%M%S.gif")'
+bindsym $mod+ctrl+shift+m exec 'pgrep wf-recorder && killall -s SIGINT wf-recorder || wf-recorder -f ~/Downloads/recording_$(date +"%Y%m%d_%H%M%S.mp4")'
+
+
+
+
+# those special mac-buttons
+#bindsym XF86LaunchA exec /home/f161/.local/bin/swayIdle_toggler.sh
+bindsym XF86LaunchB exec /usr/bin/swaylock
+
+# Volumestuff
+#
+#bindsym XF86AudioRaiseVolume exec /home/f161/.local/bin/buttons_helper_volume +10%
+#bindsym XF86AudioLowerVolume exec /home/f161/.local/bin/buttons_helper_volume -10%
+#bindsym XF86AudioMute exec /home/f161/.local/bin/buttons_helper_volume toggle-mute
+
+set $knotify ~/.local/bin/notify_on_keypress
+
+bindsym XF86AudioRaiseVolume exec '/bin/pactl set-sink-mute 0 false; pactl set-sink-volume 0 +5% && $knotify XF86AudioRaiseVolume' 
+bindsym XF86AudioLowerVolume exec '/bin/pactl set-sink-mute 0 false; pactl set-sink-volume 0 -5% && $knotify XF86AudioLowerVolume'
+bindsym XF86AudioMute exec '/bin/pactl set-sink-mute 0 toggle && $knotify XF86AudioMute'
+
+# Screenbrightness
+bindsym XF86MonBrightnessUp   exec '/usr/bin/light -s sysfs/backlight/intel_backlight -A 5 ; $knotify XF86MonBrightnessUp' 
+bindsym XF86MonBrightnessDown exec '/usr/bin/light -s sysfs/backlight/intel_backlight -U 5 ; $knotify XF86MonBrightnessDown'
+bindsym XF86KbdBrightnessUp   exec '/usr/bin/light -s sysfs/leds/smc::kbd_backlight -A 5 ; $knotify XF86KbdBrightnessUp'
+bindsym XF86KbdBrightnessDown exec '/usr/bin/light -s sysfs/leds/smc::kbd_backlight -U 5 ; $knotify XF86KbdBrightnessDown'
+
+# Play/Pause for spotify
+bindsym XF86AudioPlay exec "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause"
+
+# Next for spotify
+bindsym XF86AudioNext exec "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next"
+
+# Previous for spotify
+bindsym XF86AudioPrev exec "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous"
+
+# Stop for spotify
+bindsym XF86AudioStop exec "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Stop"
+
+
+# DEFAULT STUFF
+# start a terminal
+bindsym $mod+Return exec alacritty 
+
+# kill focused window
+bindsym $mod+Shift+q kill
+
+# Drag floating windows by holding down $mod and left mouse button.
+# Resize them with right mouse button + $mod.
+# Despite the name, also works for non-floating windows.
+# Change normal to inverse to use left mouse button for resizing and right
+# mouse button for dragging.
+floating_modifier $mod normal
+
+# reload the configuration file
+bindsym $mod+Shift+c reload
+
+# exit sway (logs you out of your wayland session)
+bindsym $mod+Shift+e exit
+#
+# Moving around:
+#
+# Move your focus around
+bindsym $mod+$left focus left
+bindsym $mod+$down focus down
+bindsym $mod+$up focus up
+bindsym $mod+$right focus right
+# or use $mod+[up|down|left|right]
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+
+# _move_ the focused window with the same, but add Shift
+bindsym $mod+Shift+$left move left
+bindsym $mod+Shift+$down move down
+bindsym $mod+Shift+$up move up
+bindsym $mod+Shift+$right move right
+# ditto, with arrow keys
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
+
+#
+# Workspaces:
+#
+# switch to workspace
+bindsym $mod+1 workspace 1
+bindsym $mod+2 workspace 2
+bindsym $mod+3 workspace 3
+bindsym $mod+4 workspace 4
+bindsym $mod+5 workspace 5
+bindsym $mod+6 workspace 6
+bindsym $mod+7 workspace 7
+bindsym $mod+8 workspace 8
+bindsym $mod+9 workspace 9
+bindsym $mod+0 workspace 10
+
+# move focused container to workspace
+bindsym $mod+Shift+1 move container to workspace 1
+bindsym $mod+Shift+2 move container to workspace 2
+bindsym $mod+Shift+3 move container to workspace 3
+bindsym $mod+Shift+4 move container to workspace 4
+bindsym $mod+Shift+5 move container to workspace 5
+bindsym $mod+Shift+6 move container to workspace 6
+bindsym $mod+Shift+7 move container to workspace 7
+bindsym $mod+Shift+8 move container to workspace 8
+bindsym $mod+Shift+9 move container to workspace 9
+bindsym $mod+Shift+0 move container to workspace 10
+
+
+# Layout stuff:
+bindsym $mod+b splith
+bindsym $mod+v splitv
+
+# Switch the current container between different layout styles
+bindsym $mod+s layout stacking
+bindsym $mod+w layout tabbed
+bindsym $mod+e layout toggle split
+
+# Make the current focus fullscreen
+bindsym $mod+f fullscreen
+
+# Toggle the current focus between tiling and floating mode
+bindsym $mod+Shift+space floating toggle
+
+# Swap focus between the tiling area and the floating area
+bindsym $mod+space focus mode_toggle
+
+# move focus to the parent container
+bindsym $mod+a focus parent
+
+# Scratchpad:
+# Move the currently focused window to the scratchpad
+bindsym $mod+Shift+minus move scratchpad
+
+# Show the next scratchpad window or hide the focused scratchpad window.
+# If there are multiple scratchpad windows, this command cycles through them.
+bindsym $mod+minus scratchpad show
+
+###### RESIZING CONTAINERS
+mode "resize" {
+    # left will shrink the containers width
+    # right will grow the containers width
+    # up will shrink the containers height
+    # down will grow the containers height
+    bindsym $left resize shrink width 10 px or 10 ppt
+    bindsym $down resize grow height 10 px or 10 ppt
+    bindsym $up resize shrink height 10 px or 10 ppt
+    bindsym $right resize grow width 10 px or 10 ppt
+
+    # ditto, with arrow keys
+    bindsym Left resize shrink width 10 px or 10 ppt
+    bindsym Down resize grow height 10 px or 10 ppt
+    bindsym Up resize shrink height 10 px or 10 ppt
+    bindsym Right resize grow width 10 px or 10 ppt
+
+    # return to default mode
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+bindsym $mod+r mode "resize"
+
+
+
+include /etc/sway/config.d/*

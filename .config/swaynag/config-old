@@ -1,0 +1,83 @@
+#Create a button with the text text that executes action when pressed.  If the environment variable `TERMINAL` is set, action will be run inside the terminal. Otherwise, it will fallback to running directly.  Multiple buttons can be defined by providing the flag multiple times.
+#button <text> <action>
+
+#Create a button with the text text that executes action when pressed.  action will be run directly instead of in a terminal. Multiple buttons can be defined by providing the flag multiple times.
+#button-no-terminal <text> <action>
+
+#Set the edge to use.
+#edge top|bottom
+
+#Set the font to use.
+font 'DejaVu Sans' 11
+
+#Read a detailed message from stdin. A button to toggle details will be added. Details are shown in a scrollable multi-line text area.
+#detailed-message
+
+#Set the text for the button that toggles details. This has no effect if there is not a detailed message. The default is Toggle details.
+#detailed-button <text>
+
+#Set the thickness for the details border.
+#details-border-size <size>
+
+#Set the thickness for the button border.
+#button-border-size <size>
+
+#Set the size of the gap between buttons.
+#button-gap <gap>
+
+#Set the size of the gap between the dismiss button and another button.
+#button-dismiss-gap <gap>
+
+#Set the margin from the right of the dismiss button to edge.
+#button-margin-right <margin>
+
+#Set the padding for the button text.
+#button-padding <padding>
+
+#Set the output to use. This should be the name of a xdg_output.
+#output <output>
+
+#Sets the text for the dismiss nagbar button. The default is X.
+#dismiss-button <text>
+
+#Set the message type. Two types are created by default error and warning. Custom types can be defined in the config file. See --config and swaynag(5) for details. Both of the default types can be overridden in the config file as well.
+#type <type>
+
+#Set the color of the background.
+#background <RRGGBB[AA]>
+
+#Set the color of the border.
+#border <RRGGBB[AA]>
+
+#Set the color of the bottom border.
+#border-bottom <RRGGBB[AA]>
+
+#Set the color for the background for buttons.
+#button-background <RRGGBB[AA]>
+
+#Set the text color.
+#text <RRGGBB[AA]>
+
+#Set the thickness of the bottom border.
+#border-bottom-size <size>
+
+#Set the padding for the message.
+#message-padding <padding>
+
+#Set the thickness for the details border.
+#details-border-size <size>
+
+#Set the thickness for the button border.
+#button-border-size <size>
+
+#Set the size of the gap between buttons.
+#button-gap <gap>
+
+#Set the size of the gap between the dismiss button and another button.
+#button-dismiss-gap <gap>
+
+#Set the margin from the right of the dismiss button to edge.
+#button-margin-right <margin>
+
+#Set the padding for the button text.
+#button-padding <padding>

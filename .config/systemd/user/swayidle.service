@@ -1,0 +1,17 @@
+[Unit]
+Description=Idle manager for Wayland
+Documentation=man:swayidle(1)
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/swayidle -w \
+                    timeout 180 'light -O; light -S 1' resume 'light -I' \
+                    timeout 360 'swaylock -f' \
+                    timeout 420 'swaymsg output * dpms off' resume 'swaymsg output * dpms on' \
+                    timeout 900 'systemctl suspend' \
+                    before-sleep 'swaylock -f' \
+                    idlehint 180
+
+[Install]
+WantedBy=sway-session.target

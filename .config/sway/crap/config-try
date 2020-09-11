@@ -1,0 +1,212 @@
+
+
+include test
+
+
+set $mod Mod4
+
+set $default_font_name  'DejaVu Sans'
+set $default_font_size  11
+
+font $default_font_name $default_font_size
+
+## STARTUPS ########################################################################################
+exec udiskie --no-notify
+exec mako
+#exec ~/.local/bin/notify_when_upgradable.py
+
+
+
+## GTK3-SETTINGS ###################################################################################
+
+set $gnome-schema org.gnome.desktop.interface
+
+exec_always {
+    gsettings set $gnome-schema gtk-theme 'Adwaita:dark'
+    #gsettings set $gnome-schema icon-theme 'Your icon theme'
+    gsettings set $gnome-schema cursor-theme 'Adwaita'
+}
+
+
+## IDLE-FUNCTION ###################################################################################
+set $idle_def_args '-w'
+
+# Dim screen
+set $idle_dim_timeout 180
+set $idle_dim_cmd 'light -O; light -S 1' 
+set $idle_dim_resume_cmd 'light -I' 
+
+# Lock screen
+set $idle_lock_timeout 360
+set $idle_lock_cmd 'swaylock -f' 
+
+# Turn off 
+set $idle_screen_off_timeout 420
+set $idle_screen_off_cmd 'swaymsg "output * dpms off"'
+set $idle_screen_on_cmd 'swaymsg "output * dpms on"' 
+
+# Suspend
+set $idle_suspend_timeout 900
+set $idle_suspend_cmd 'systemctl suspend' 
+set $idle_before_suspend_cmd 'swaylock -f' 
+
+# Executing everything above
+exec swayidle $idle_def_args timeout $idle_dim_timeout $idle_dim_cmd resume $idle_dim_resume_cmd timeout $idle_lock_timeout $idle_lock_cmd timeout $idle_screen_off_timeout $idle_screen_off_cmd resume $idle_screen_on_cmd timeout $idle_suspend_timeout $idle_suspend_cmd before-sleep $idle_before_suspend_cmd  
+
+
+## OUTPUTS #########################################################################################
+
+# MBP resolutions are 1920x1200 1680x1050 1280x800 1024x640
+output eDP-1 resolution 2560x1600 position 0,0 scale 1.25
+
+
+## INPUTS ##########################################################################################
+input "1452:627:bcm5974" {
+    tap disabled
+    natural_scroll enabled
+    dwt enabled
+}
+
+input "1452:627:Apple_Inc._Apple_Internal_Keyboard_/_Trackpad" {
+    xkb_layout se
+    xkb_variant mac
+    xkb_options compose:rwin
+}
+
+# seatsetup
+seat seat0 attach *
+seat seat0 hide_cursor 3000
+seat seat0 xcursor_theme Adwaita 24
+
+#
+# COLORS
+#
+
+# SWAY
+set $style_default_bg                #1e1e1e
+set $style_default_text              #a7a7a7
+
+set $c_focused_border                #4c7899
+set $c_focused_bg                    #285577
+set $c_focused_text                  $style_default_text
+set $c_focused_indicator             $c_focused_border
+set $c_focused_cborder               $c_focused_border
+
+set $c_unfocused_border              #333333
+set $c_unfocused_bg                  #222222
+set $c_unfocused_text                $style_default_text
+set $c_unfocused_indicator           $c_unfocused_border
+set $c_unfocused_cborder             $c_unfocused_border
+
+set $c_focused_inactive_border       $c_unfocused_border
+set $c_focused_inactive_bg           $c_unfocused_bg
+set $c_focused_inactive_text         $style_default_text
+set $c_focused_inactive_indicator    $c_focused_inactive_border
+set $c_focused_inactive_cborder      $c_focused_inactive_border
+
+set $c_urgent_border                 #2f343a
+set $c_urgent_bg                     #900000
+set $c_urgent_text                   $style_default_text
+set $c_urgent_indicator              $c_urgent_border
+set $c_urgent_cborder                $c_urgent_border
+
+# SWAYBAR
+set $bar_statusline 	             $style_default_text
+set $bar_background	                 #00000000
+set $bar_separator                   $bar_background
+
+set $bar_focused_border              $c_focused_border
+set $bar_focused_bg                  $c_focused_bg
+set $bar_focused_text                $c_focused_text
+
+set $bar_active_border               $bar_focused_border
+set $bar_active_bg                   $bar_focused_bg
+set $bar_active_text                 $bar_focused_text
+
+set $bar_inactive_border             $c_unfocused_border
+set $bar_inactive_bg                 $c_unfocused_bg
+set $bar_inactive_text               $c_unfocused_text
+
+set $bar_urgent_border               $c_urgent_border 
+set $bar_urgent_bg                   $c_urgent_bg
+set $bar_urgent_text                 $c_urgent_text
+
+# BEMENU
+set $bmenu_bg                        $test_color
+set $bmenu_text                      $style_default_text
+set $bmenu_title_bg                  $bmenu_bg
+set $bmenu_title_text                $bmenu_text
+set $bmenu_filter_bg                 $bmenu_bg
+set $bmenu_filter_text               $bmenu_text
+set $bmenu_normal_bg                 $bmenu_bg
+set $bmenu_normal_text               $bmenu_text
+set $bmenu_highlight_bg              $bmenu_bg
+set $bmenu_highlight_text            $bmenu_text
+set $bmenu_selected_bg               $test_color
+set $bmenu_selected_text             $bmenu_text
+set $bmenu_scrollbar_bg              $bmenu_bg
+set $bmenu_scrollbar_text            $bmenu_text
+
+## WINDOW SETTINGS #################################################################################
+#default_border normal 1
+gaps inner 10
+gaps outer 0
+output "*" background /home/f161/.bg.jpg fill 
+#output "*" background #282828 solid_color 
+
+# Colors (remember #16181c)
+client.focused           $c_focused_border           $c_focused_bg           $c_focused_text           $c_focused_indicator           $c_focused_cborder
+client.focused_inactive  $c_focused_inactive_border  $c_focused_inactive_bg  $c_focused_inactive_text  $c_focused_inactive_indicator  $c_focused_inactive_cborder
+client.unfocused         $c_unfocused_border         $c_unfocused_bg         $c_unfocused_text         $c_unfocused_indicator         $c_unfocused_cborder
+client.urgent            $c_urgent_border            $c_urgent_bg            $c_urgent_text            $c_urgent_indicator            $c_urgent_cborder
+
+
+## INDIVIDUAL APP SETTINGS #########################################################################
+for_window [app_id="firefox"] inhibit_idle fullscreen 
+for_window [app_id="firefox"] border pixel 1
+
+
+## BAR SETUP #######################################################################################
+
+bar { 
+    font $default_font_name $default_font_size
+    workspace_buttons no
+    position bottom
+    pango_markup enabled
+    height 35
+    separator_symbol ""
+    status_edge_padding 7
+    status_padding 0
+    swaybar_command swaybar
+    status_command /home/f161/.local/bin/swaybar_helper.sh
+    #status_command /home/f161/.local/bin/sb_engine.py
+    gaps 0 
+    colors {
+    	statusline $bar_statusline
+    	background $bar_background
+        separator  $bar_separator
+
+                           #BORDER               #BG               #TEXT
+        focused_workspace  $bar_focused_border   $bar_focused_bg   $bar_focused_text  
+        active_workspace   $bar_active_border    $bar_active_bg    $bar_active_text
+        inactive_workspace $bar_inactive_border  $bar_inactive_bg  $bar_inactive_text
+        urgent_workspace   $bar_urgent_border    $bar_urgent_bg    $bar_urgent_text
+    }
+}
+
+
+# 100% — FF 95% — F2 90% — E6 85% — D9 80% — CC 75% — BF 70% — B3 65% — A6 60% — 99 55% — 8C 50% — 80 45% — 73 40% — 66 35% — 59 30% — 4D 25% — 40 20% — 33 15% — 26 10% — 1A 5% — 0D 0% — 00 
+
+
+## LAUNCHER ########################################################################################
+
+
+# defines the font to be used ('name [size]'). 
+set $bmenu_font    $default_font_name $default_font_size
+set $bmenu_prompt  " "                        
+
+include bindsyms
+
+## INCLUDE XDG-FILES ###############################################################################
+
+include /etc/sway/config.d/*

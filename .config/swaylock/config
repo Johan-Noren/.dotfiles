@@ -1,0 +1,76 @@
+#By default, the following paths are checked: $HOME/.swaylock/config, $XDG_CONFIG_HOME/swaylock/config, and SYSCONFDIR/swaylock/config. All flags aside from this one are valid options in the configuration file using the format long-option=value.  For options such as ignore-empty-password, just supply the long-option.  All leading dashes should be omitted and the equals sign is required for flags that take an argument.  
+
+#Enable debugging output.
+debug
+
+#When an empty password is provided by the user, do not validate it.
+#ignore-empty-password
+
+#Show the number of failed authentication attempts on the indicator.
+#show-failed-attempts
+
+#Detach from the controlling terminal after locking.  Note: this is the default behavior of i3lock.
+daemonize
+
+#Disable the unlock indicator.
+#no-unlock-indicator
+
+#Display the given image, optionally only on the given output. Use -c to set a background color. If the path potentially contains a ':', prefix it with another image [[<output>]:]<path>
+image=/home/f161/.bg.jpg
+
+#Force displaying the current xkb layout while typing, even if only one layout is configured.
+#show-keyboard-layout
+
+#Force hiding the current xkb layout while typing, even if more than one layout is configured or the show-keyboard-layout option is set.
+#hide-keyboard-layout
+
+#Disable the Caps Lock Text.
+disable-caps-lock-text
+
+#Show the current Caps Lock state also on the indicator.
+#indicator-caps-lock
+
+#Scaling mode for images: stretch, fill, fit, center, or tile. Use the additional mode solid_color to display only the background color, even if a background image is specified.
+#scaling=center
+
+
+font=DejaVu Sans 19
+#indicator-radius=50
+#indicator-thickness=10 
+
+color=282828
+bs-hl-color=cc241d
+key-hl-color=282828
+separator-color=ffffff
+
+caps-lock-bs-hl-color=cc241d
+caps-lock-key-hl-color=cc241d
+
+inside-color=ffffff00
+inside-clear-color=ffffff
+inside-caps-lock-color=ffffff
+inside-ver-color=ffffff
+inside-wrong-color=ffffff
+
+layout-bg-color=ffffff
+layout-border-color=282828
+layout-text-color=282828
+
+line-color=ffffff
+line-clear-color=ffffff
+line-caps-lock-color=ffffff
+line-ver-color=ffffff
+line-wrong-color=ffffff
+
+ring-color=ffffff
+ring-clear-color=ffffff
+ring-caps-lock-color=ffffff
+ring-ver-color=ffffff
+ring-wrong-color=ffffff
+
+text-ver-color=282828
+text-color=282828
+text-clear-color=282828
+text-caps-lock-color=282828
+text-wrong-color=cc241d
+

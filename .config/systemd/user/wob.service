@@ -1,0 +1,17 @@
+[Unit]
+Description=A lightweight overlay volume/backlight/progress/anything bar for Wayland
+Documentation=man:wob(1)
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+
+ExecStart=/bin/sh -c '/home/f161/.local/bin/wob.sh'
+
+
+#ExecStartPre=/usr/bin/mkfifo /home/f161/.cache/wobpipe
+#ExecStart=/bin/sh -c '/usr/bin/tail -f /home/f161/.cache/wobpipe | /usr/bin/wob --timeout=2000 --output=0 --border=1 --padding=22 --background-color="\\\#ff1e1e1e" --border-color="\\\#ff5f5a60" --bar-color="\\\#ffcf6a4c"'
+#ExecStop=/usr/bin/rm /home/f161/.cache/wobpipe
+
+[Install]
+WantedBy=sway-session.target

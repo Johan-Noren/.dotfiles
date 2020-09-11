@@ -1,0 +1,3 @@
+#TabsToolbar .tabbrowser-tab[selected] .tab-line {
+    display: none !important;
+}

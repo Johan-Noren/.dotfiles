@@ -1,0 +1,9 @@
+[Unit]
+Description=the service that randomizes the hostname
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c '/usr/bin/hostnamectl set-hostname $(cat /usr/share/custom_patches/hostname_wordlist | sort -R | head -n 1)'
+
+[Install]
+WantedBy=multi-user.target

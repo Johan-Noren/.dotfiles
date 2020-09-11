@@ -1,0 +1,10 @@
+[Unit]
+Description=Notifyer for upgradable packages
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/notify_when_upgradable.py
+
+[Install]
+WantedBy=sway-session.target

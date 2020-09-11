@@ -1,0 +1,10 @@
+[Unit]
+Description=Suspender and warner for low battery
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/suspend_on_low_battery.py
+
+[Install]
+WantedBy=sway-session.target

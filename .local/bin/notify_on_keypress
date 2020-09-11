@@ -1,0 +1,87 @@
+#!/bin/sh
+
+NCMD="/usr/bin/notify-send.sh"
+NCMD_ARGS="--category=osd --replace-file="
+
+CACHE_XF86AudioRaiseVolume="$HOME/.cache/notify_on_keypress"
+CACHE_XF86AudioLowerVolume="$HOME/.cache/notify_on_keypress"
+CACHE_XF86AudioMute="$HOME/.cache/notify_on_keypress"
+CACHE_XF86MonBrightnessUp="$HOME/.cache/notify_on_keypress"
+CACHE_XF86MonBrightnessDown="$HOME/.cache/notify_on_keypress"
+CACHE_XF86KbdBrightnessUp="$HOME/.cache/notify_on_keypress"
+CACHE_XF86KbdBrightnessDown="$HOME/.cache/notify_on_keypress"
+
+HDR_XF86AudioRaiseVolume="Speaker Volume"
+HDR_XF86AudioLowerVolume="Speaker Volume"
+HDR_XF86AudioMute="Speaker Volume"
+HDR_XF86MonBrightnessUp="Display Brightness"
+HDR_XF86MonBrightnessDown="Display Brightness"
+HDR_XF86KbdBrightnessUp="Keyboard Brightness"
+HDR_XF86KbdBrightnessDown="Keyboard Brightness"
+
+CHECK_MUTE_OR_VOLUME()
+{
+    if [ "$(pactl list sinks | grep 'Mute:' | cut -d' ' -f2)" = "yes" ]; then
+        echo "0"
+    elif [ "$(pactl list sinks | grep 'Mute:' | cut -d' ' -f2)" = "no" ]; then
+        echo "$(/usr/bin/pactl list sinks | grep "Volume: fr" | cut -d'/' -f2 | sed -r 's/\s+//' | cut -d'%' -f1)"
+    fi
+
+}
+
+CMD_XF86AudioRaiseVolume=$(CHECK_MUTE_OR_VOLUME)
+CMD_XF86AudioLowerVolume=$(CHECK_MUTE_OR_VOLUME)
+CMD_XF86AudioMute=$(CHECK_MUTE_OR_VOLUME)
+CMD_XF86MonBrightnessUp=$(/usr/bin/light -s sysfs/backlight/intel_backlight | sed 's/\..*//')
+CMD_XF86MonBrightnessDown=$(/usr/bin/light -s sysfs/backlight/intel_backlight | sed 's/\..*//')
+CMD_XF86KbdBrightnessUp=$(/usr/bin/light -s sysfs/leds/smc::kbd_backlight | sed 's/\..*//')
+CMD_XF86KbdBrightnessDown=$(/usr/bin/light -s sysfs/leds/smc::kbd_backlight | sed 's/\..*//')
+
+touch $CACHE_XF86AudioRaiseVolume
+touch $CACHE_XF86AudioLowerVolume
+touch $CACHE_XF86AudioMute
+touch $CACHE_XF86MonBrightnessUp
+touch $CACHE_XF86MonBrightnessDown
+touch $CACHE_XF86KbdBrightnessUp
+touch $CACHE_XF86KbdBrightnessDown
+
+if [ ! -f /bin/notify-send.sh ]; then
+    echo "Notify-send.sh is missing"
+    exit 1
+fi
+
+
+case "$1" in
+  "XF86AudioRaiseVolume")
+	  $NCMD $NCMD_ARGS$CACHE_XF86AudioRaiseVolume "$HDR_XF86AudioRaiseVolume" --hint=int:value:"$CMD_XF86AudioRaiseVolume"
+    ;;
+
+  "XF86AudioLowerVolume")
+	  $NCMD $NCMD_ARGS$CACHE_XF86AudioLowerVolume "$HDR_XF86AudioLowerVolume" --hint=int:value:"$CMD_XF86AudioLowerVolume"
+    ;;
+
+  "XF86AudioMute")
+	  $NCMD $NCMD_ARGS$CACHE_XF86AudioMute "$HDR_XF86AudioMute" --hint=int:value:"$CMD_XF86AudioMute"
+    ;;
+
+  "XF86MonBrightnessUp")
+	  $NCMD $NCMD_ARGS$CACHE_XF86MonBrightnessUp "$HDR_XF86MonBrightnessUp" --hint=int:value:"$CMD_XF86MonBrightnessUp"
+    ;;
+
+  "XF86MonBrightnessDown")
+	  $NCMD $NCMD_ARGS$CACHE_XF86MonBrightnessDown "$HDR_XF86MonBrightnessDown" --hint=int:value:"$CMD_XF86MonBrightnessDown"
+    ;;
+
+  "XF86KbdBrightnessUp")
+	  $NCMD $NCMD_ARGS$CACHE_XF86KbdBrightnessUp "$HDR_XF86KbdBrightnessUp" --hint=int:value:"$CMD_XF86KbdBrightnessUp"
+    ;;
+
+  "XF86KbdBrightnessDown")
+	  $NCMD $NCMD_ARGS$CACHE_XF86KbdBrightnessDown "$HDR_XF86KbdBrightnessDown" --hint=int:value:"$CMD_XF86KbdBrightnessDown"
+    ;;
+
+  *)
+    echo "You have failed to specify what to do correctly."
+    exit 1
+    ;;
+esac

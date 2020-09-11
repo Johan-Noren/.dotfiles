@@ -1,0 +1,192 @@
+
+bindsym $mod+d exec bemenu-run --fn $bmenu_font --prompt $bmenu_prompt --tb "$bmenu_title_bg" --tf "$bmenu_title_text" --fb "$bmenu_filter_bg" --ff "$bmenu_filter_text" --nb "$bmenu_normal_bg" --nf "$bmenu_normal_text" --hb "$bmenu_highlight_bg" --hf "$bmenu_highlight_text" --sb "$bmenu_selected_bg" --sf "$bmenu_selected_text" --scb "$bmenu_scrollbar_bg" --scf "$bmenu_scrollbar_text"
+
+#bindsym $mod+d exec termite --name=launcher --config=/home/f161/.config/termite/launcher -e "bash -c 'compgen -c | sort -u | pick | xargs -r swaymsg -t command exec'"
+#for_window [app_id="^launcher$"] floating enable, border pixel 5, resize set 618 74
+
+#bindsym $mod+d exec termite --exec=$(echo -n "$PATH" | xargs -d: -I{} -r -- find -L {} -maxdepth 1 -mindepth 1 -type f -executable -printf '%P\n' 2>/dev/null | sort -u | pick)
+
+
+## KEYBINDINGS #####################################################################################
+set $left h
+set $down j
+set $up k
+set $right l
+
+
+# custom stuff
+bindsym $mod+escape exec '/bin/makoctl dismiss -a'
+
+# Screengrab
+bindsym $mod+ctrl+shift+g exec grim ~/Downloads/$(date +'screengrab_%Y%m%d-%H%M%S.png')
+bindsym $mod+g exec grim -g "$(slurp)" - | wl-copy
+bindsym $mod+shift+g exec grim -g "$(slurp)" ~/Downloads/$(date +'screengrab_%Y%m%d-%H%M%S.png')
+
+# Screenrecording
+#bindsym $mod+ctrl+shift+m exec wf-recorder -f ~/Downloads/$(date +'recording_%Y%m%d-%H%M%S.mp4')
+#bindsym $mod+shift+m exec wf-recorder -g "$(slurp)" -f ~/Downloads/$(date +'recording_%Y%m%d-%H%M%S.mp4')
+
+bindsym $mod+shift+m exec 'pgrep wf-recorder && killall -s SIGINT wf-recorder || wf-recorder -c gif -g "$(slurp)" -f ~/Downloads/recording_$(date +"%Y%m%d_%H%M%S.gif")'
+bindsym $mod+ctrl+shift+m exec 'pgrep wf-recorder && killall -s SIGINT wf-recorder || wf-recorder -f ~/Downloads/recording_$(date +"%Y%m%d_%H%M%S.mp4")'
+
+
+
+
+# those special mac-buttons
+#bindsym XF86LaunchA exec /home/f161/.local/bin/swayIdle_toggler.sh
+bindsym XF86LaunchB exec /usr/bin/swaylock
+
+# Volumestuff
+#
+#bindsym XF86AudioRaiseVolume exec /home/f161/.local/bin/buttons_helper_volume +10%
+#bindsym XF86AudioLowerVolume exec /home/f161/.local/bin/buttons_helper_volume -10%
+#bindsym XF86AudioMute exec /home/f161/.local/bin/buttons_helper_volume toggle-mute
+
+set $knotify ~/.local/bin/notify_on_keypress
+
+bindsym XF86AudioRaiseVolume exec '/bin/pactl set-sink-mute 0 false; pactl set-sink-volume 0 +5% && $knotify XF86AudioRaiseVolume' 
+bindsym XF86AudioLowerVolume exec '/bin/pactl set-sink-mute 0 false; pactl set-sink-volume 0 -5% && $knotify XF86AudioLowerVolume'
+bindsym XF86AudioMute exec '/bin/pactl set-sink-mute 0 toggle && $knotify XF86AudioMute'
+
+# Screenbrightness
+bindsym XF86MonBrightnessUp   exec '/usr/bin/light -s sysfs/backlight/intel_backlight -A 5 ; $knotify XF86MonBrightnessUp' 
+bindsym XF86MonBrightnessDown exec '/usr/bin/light -s sysfs/backlight/intel_backlight -U 5 ; $knotify XF86MonBrightnessDown'
+bindsym XF86KbdBrightnessUp   exec '/usr/bin/light -s sysfs/leds/smc::kbd_backlight -A 5 ; $knotify XF86KbdBrightnessUp'
+bindsym XF86KbdBrightnessDown exec '/usr/bin/light -s sysfs/leds/smc::kbd_backlight -U 5 ; $knotify XF86KbdBrightnessDown'
+
+# Play/Pause for spotify
+bindsym XF86AudioPlay exec "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause"
+
+# Next for spotify
+bindsym XF86AudioNext exec "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next"
+
+# Previous for spotify
+bindsym XF86AudioPrev exec "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous"
+
+# Stop for spotify
+bindsym XF86AudioStop exec "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Stop"
+
+
+# DEFAULT STUFF
+# start a terminal
+bindsym $mod+Return exec alacritty 
+
+# kill focused window
+bindsym $mod+Shift+q kill
+
+# Drag floating windows by holding down $mod and left mouse button.
+# Resize them with right mouse button + $mod.
+# Despite the name, also works for non-floating windows.
+# Change normal to inverse to use left mouse button for resizing and right
+# mouse button for dragging.
+floating_modifier $mod normal
+
+# reload the configuration file
+bindsym $mod+Shift+c reload
+
+# exit sway (logs you out of your wayland session)
+bindsym $mod+Shift+e exit
+#
+# Moving around:
+#
+# Move your focus around
+bindsym $mod+$left focus left
+bindsym $mod+$down focus down
+bindsym $mod+$up focus up
+bindsym $mod+$right focus right
+# or use $mod+[up|down|left|right]
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+
+# _move_ the focused window with the same, but add Shift
+bindsym $mod+Shift+$left move left
+bindsym $mod+Shift+$down move down
+bindsym $mod+Shift+$up move up
+bindsym $mod+Shift+$right move right
+# ditto, with arrow keys
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
+
+#
+# Workspaces:
+#
+# switch to workspace
+bindsym $mod+1 workspace 1
+bindsym $mod+2 workspace 2
+bindsym $mod+3 workspace 3
+bindsym $mod+4 workspace 4
+bindsym $mod+5 workspace 5
+bindsym $mod+6 workspace 6
+bindsym $mod+7 workspace 7
+bindsym $mod+8 workspace 8
+bindsym $mod+9 workspace 9
+bindsym $mod+0 workspace 10
+
+# move focused container to workspace
+bindsym $mod+Shift+1 move container to workspace 1
+bindsym $mod+Shift+2 move container to workspace 2
+bindsym $mod+Shift+3 move container to workspace 3
+bindsym $mod+Shift+4 move container to workspace 4
+bindsym $mod+Shift+5 move container to workspace 5
+bindsym $mod+Shift+6 move container to workspace 6
+bindsym $mod+Shift+7 move container to workspace 7
+bindsym $mod+Shift+8 move container to workspace 8
+bindsym $mod+Shift+9 move container to workspace 9
+bindsym $mod+Shift+0 move container to workspace 10
+
+
+# Layout stuff:
+bindsym $mod+b splith
+bindsym $mod+v splitv
+
+# Switch the current container between different layout styles
+bindsym $mod+s layout stacking
+bindsym $mod+w layout tabbed
+bindsym $mod+e layout toggle split
+
+# Make the current focus fullscreen
+bindsym $mod+f fullscreen
+
+# Toggle the current focus between tiling and floating mode
+bindsym $mod+Shift+space floating toggle
+
+# Swap focus between the tiling area and the floating area
+bindsym $mod+space focus mode_toggle
+
+# move focus to the parent container
+bindsym $mod+a focus parent
+
+# Scratchpad:
+# Move the currently focused window to the scratchpad
+bindsym $mod+Shift+minus move scratchpad
+
+# Show the next scratchpad window or hide the focused scratchpad window.
+# If there are multiple scratchpad windows, this command cycles through them.
+bindsym $mod+minus scratchpad show
+
+###### RESIZING CONTAINERS
+mode "resize" {
+    # left will shrink the containers width
+    # right will grow the containers width
+    # up will shrink the containers height
+    # down will grow the containers height
+    bindsym $left resize shrink width 10 px or 10 ppt
+    bindsym $down resize grow height 10 px or 10 ppt
+    bindsym $up resize shrink height 10 px or 10 ppt
+    bindsym $right resize grow width 10 px or 10 ppt
+
+    # ditto, with arrow keys
+    bindsym Left resize shrink width 10 px or 10 ppt
+    bindsym Down resize grow height 10 px or 10 ppt
+    bindsym Up resize shrink height 10 px or 10 ppt
+    bindsym Right resize grow width 10 px or 10 ppt
+
+    # return to default mode
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+bindsym $mod+r mode "resize"

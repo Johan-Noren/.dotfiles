@@ -1,0 +1,5 @@
+include /etc/sway/config.d/*
+include ~/.config/sway/config.d/*
+
+exec systemctl --user start sway-session.target
+exec systemd-notify --ready
