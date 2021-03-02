@@ -14,10 +14,10 @@ USERNAME="testu"
 CONTINENT_CITY="Europe/Stockholm"
 
 TARGET_DISK="/dev/sda"
-PARTITION1="${TARGET_DISK1}"
-PARTITION2="${TARGET_DISK2}"
-PARTITION3="${TARGET_DISK3}"
-PARTITION4="${TARGET_DISK4}"
+PARTITION1="${TARGET_DISK}1"
+PARTITION2="${TARGET_DISK}2"
+PARTITION3="${TARGET_DISK}3"
+PARTITION4="${TARGET_DISK}4"
 SWAP_SIZE="8" # same as ram if using hibernation, otherwise minimum of 8
 
 # Set different microcode, kernel params and initramfs modules according to CPU vendor
