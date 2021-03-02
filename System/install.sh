@@ -14,10 +14,10 @@ USERNAME="testu"
 CONTINENT_CITY="Europe/Stockholm"
 
 TARGET_DISK="/dev/sda"
-PARTITION1="${TARGET_DISK}1"
-PARTITION2="${TARGET_DISK}2"
-PARTITION3="${TARGET_DISK}3"
-PARTITION4="${TARGET_DISK}4"
+#PARTITION1="${TARGET_DISK}1"
+#PARTITION2="${TARGET_DISK}2"
+#PARTITION3="${TARGET_DISK}3"
+#PARTITION4="${TARGET_DISK}4"
 SWAP_SIZE="8" # same as ram if using hibernation, otherwise minimum of 8
 
 # Set different microcode, kernel params and initramfs modules according to CPU vendor
@@ -45,41 +45,54 @@ pacman -Sy --noconfirm
 
 
 echo "Creating partitions"
-printf "o\nY\nw\nY\n" | gdisk $TARGET_DISK
-printf "n\n1\n\n+512M\nef00\nw\ny\n" | gdisk $TARGET_DISK
-printf "n\n2\n\n\n8300\nw\ny\n" | gdisk $TARGET_DISK
+#printf "o\nY\nw\nY\n" | gdisk $TARGET_DISK
+#printf "n\n1\n\n+512M\nef00\nw\ny\n" | gdisk $TARGET_DISK
+#printf "n\n2\n\n\n8300\nw\ny\n" | gdisk $TARGET_DISK
 
-
+sgdisk --clear \
+       --new=1:0:+550MiB --typecode=1:ef00    --change-name=1:EFI \
+       --new=2:0:+8GiB   --typecode=2:8200    --change-name=2:cryptswap \
+       --new=3:0:0       --typecode=3:8300    --change-name=3:cryptsystem \
+       $TARGET_DISK
+       
+      
 echo "Setting up cryptographic volume"
 mkdir -p -m0700 /run/cryptsetup
-echo "$ENCRYPTION_PASSPHRASE" | cryptsetup -q -h sha512 -s 512 --use-random --type luks2 luksFormat $PARTITION2
-echo "$ENCRYPTION_PASSPHRASE" | cryptsetup luksOpen $PARTITION2 cryptroot
+echo "$ENCRYPTION_PASSPHRASE" | cryptsetup -q -h sha512 -s 512 --use-random --type luks2 luksFormat /dev/disk/by-partlabel/cryptsystem
+echo "$ENCRYPTION_PASSPHRASE" | cryptsetup luksOpen /dev/disk/by-partlabel/cryptsystem system
 
+echo "Setting up EFI"
+mkfs.fat -F32 -n LINUXEFI /dev/disk/by-partlabel/EFI
 
-echo "Formatting the partitions"
-mkfs.fat -F32 -n LINUXEFI $PARTITION1
-mkfs.btrfs -L Arch /dev/mapper/cryptroot
-
+echo "Setting up swap"
+cryptsetup open --type plain --key-file /dev/urandom /dev/disk/by-partlabel/cryptswap swap
+mkswap -L swap /dev/mapper/swap
+swapon -L swap
 
 echo "Setting up BTRFS"
-mount -o compress=zstd,noatime /dev/mapper/cryptroot /mnt
-btrfs subvol create /mnt/@
-btrfs subvol create /mnt/@home
-btrfs subvol create /mnt/@swap
+# Setting mountflags
+o="defaults,x-mount.mkdir"
+o_btrfs="${o},compress=lzo,ssd,noatime"
 
+# Temporarily mount system
+mkfs.btrfs -L system /dev/mapper/system
+mount -t btrfs LABEL=system /mnt
 
-mkdir /mnt/snapshots
-btrfs subvol create /mnt/snapshots/@
-btrfs subvol create /mnt/snapshots/@home
+# Create subvolumns
+btrfs subvol create /mnt/root
+btrfs subvol create /mnt/home
+btrfs subvol create /mnt/snapshots
 
+# Unmount
+umount -R /mnt
 
-umount /mnt
-mount -o compress=zstd,noatime,subvol=@ /dev/mapper/cryptroot /mnt
-mkdir -p /mnt/{boot,home,.snapshots/root,.snapshots/home}
-mount -o compress=zstd,noatime,subvol=@home /dev/mapper/cryptroot /mnt/home
-mount -o compress=zstd,noatime,subvol=/snapshots/@ /dev/mapper/cryptroot /mnt/.snapshots/root
-mount -o compress=zstd,noatime,subvol=/snapshots/@home /dev/mapper/cryptroot /mnt/.snapshots/home
-mount $PARTITION1 /mnt/boot
+# Mount subvolumes
+mount -t btrfs -o subvol=root,$o_btrfs LABEL=system /mnt
+mount -t btrfs -o subvol=home,$o_btrfs LABEL=system /mnt/home
+mount -t btrfs -o subvol=snapshots,$o_btrfs LABEL=system /mnt/.snapshots
+
+# Mount EFI
+mount LABEL=EFI /mnt/boot
 
 
 
@@ -181,12 +194,13 @@ title Arch Linux
 linux /vmlinuz-linux
 initrd /$cpu_microcode.img
 initrd /initramfs-linux.img
-options rd.luks.name=$(blkid -s UUID -o value ${PARTITION2})=cryptroot root=/dev/mapper/cryptroot rootflags=subvol=@ $KERNEL_OPTIONS
+options rd.luks.name=$(blkid -s UUID -o value /dev/disk/by-disklabel/cryptsystem)=cryptsystem root=/dev/mapper/system rootflags=subvol=@ $KERNEL_OPTIONS
 END
 
 echo "Setting up Pacman hook for automatic systemd-boot updates"
 mkdir -p /etc/pacman.d/hooks/
 touch /etc/pacman.d/hooks/systemd-boot.hook
+
 tee -a /etc/pacman.d/hooks/systemd-boot.hook << END
 [Trigger]
 Type = Package
@@ -199,30 +213,8 @@ Exec = /usr/bin/bootctl update
 END
 
 
-echo "Setting up swap"
-
 echo "Mounting swapfile subvolume"
 mkdir /swap
-mount -o noatime,subvol=@swap /dev/mapper/cryptroot /swap
-
-echo "Creating swapfile"
-truncate -s 0 /swap/swapfile
-chattr +C /swap/swapfile
-btrfs property set /swap/swapfile compression none
-fallocate -l "$SWAP_SIZE"G /swap/swapfile
-
-echo "Setting correct permissions and formatting to swap"
-mkswap /swap/swapfile
-chmod 600 /swap/swapfile
-
-echo "Activating swapfile"
-swapon /swap/swapfile
-
-echo "Adding swap entry to fstab"
-tee -a /etc/fstab << END
-#/dev/mapper/cryptroot /swap btrfs rw,noatime,space_cachesubvol=@swap 0 0
-/swap/swapfile none swap defaults,discard 0 0
-END
 
 echo "Setting swappiness to 20"
 touch /etc/sysctl.d/99-swappiness.conf
