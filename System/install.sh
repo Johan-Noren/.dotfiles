@@ -1,26 +1,35 @@
 #!/bin/bash
 
 
-encryption_passphrase=""
-root_password=""
-user_password=""
-hostname=""
-username=""
-continent_city=""
-swap_size="8" # same as ram if using hibernation, otherwise minimum of 8
-partition1="/dev/sda1"
-partition2="/dev/sda2"
-partition3="/dev/sda3"
-partition4="/dev/sda4"
+ENCRYPTION_PASSPHRASE=""
+ROOT_PASSWORD=""
+USER_PASSWORD=""
+HOSTNAME=""
+USERNAME=""
+CONTINENT_CITY="Europe/Stockholm"
+
+TARGET_DISK="/dev/sda"
+PARTITION1="$TARGET_DISK1"
+PARTITION2="$TARGET_DISK2"
+PARTITION3="$TARGET_DISK3"
+PARTITION4="$TARGET_DISK4"
+SWAP_SIZE="8" # same as ram if using hibernation, otherwise minimum of 8
 
 # Set different microcode, kernel params and initramfs modules according to CPU vendor
-cpu_vendor=$(cat /proc/cpuinfo | grep vendor | uniq)
-cpu_microcode="intel-ucode"
+CPU_VENDOR=$(cat /proc/cpuinfo | grep vendor | uniq)
+CPU_MICROCODE="intel-ucode"
 
-kernel_options="i915.fastboot=1 i915.enable_fbc=1 i915.enable_guc=2 rw quiet loglevel=3 vt.global_cursor_default=0  
+# Kernel options to
+KERNEL_OPTIONS="i915.fastboot=1 i915.enable_fbc=1 i915.enable_guc=2 rw quiet loglevel=3 vt.global_cursor_default=0  
 rd.luks.options=discard rd.systemd.show_status=0 rd.udev.log-priority=3 nmi_watchdog=0"
 
-initramfs_modules="intel_agp i915"
+# The mkinitcpio.conf file will be modified with the modules and hooks below
+INITRAMFS_MODULES="intel_agp i915 btrfs"
+INITRAMFS_HOOKS="base systemd block autodetect modconf keyboard sd-vconsole sd-encrypt filesystems"
+
+# Sets packages to be installed
+PACKAGES="base base-devel linux linux-headers linux-firmware efibootmgr btrfs-progs e2fsprogs device-mapper $CPU_MICROCODE cryptsetup networkmanager wget man-db man-pages neovim diffutils flatpak"
+
 
 echo "Updating system clock"
 timedatectl set-ntp true
@@ -31,18 +40,18 @@ pacman -Sy --noconfirm
 
 
 echo "Creating partitions"
-printf "n\n1\n4096\n+512M\nef00\nw\ny\n" | gdisk /dev/sda
-printf "n\n2\n\n\n8e00\nw\ny\n" | gdisk /dev/sda
+printf "n\n1\n4096\n+512M\nef00\nw\ny\n" | gdisk $TARGET_DISK
+printf "n\n2\n\n\n8e00\nw\ny\n" | gdisk $TARGET_DISK
 
 
 echo "Setting up cryptographic volume"
 mkdir -p -m0700 /run/cryptsetup
-echo "$encryption_passphrase" | cryptsetup -q -h sha512 -s 512 --use-random --type luks2 luksFormat /dev/sda2
-echo "$encryption_passphrase" | cryptsetup luksOpen /dev/sda2 cryptroot
+echo "$ENCRYPTION_PASSPHRASE" | cryptsetup -q -h sha512 -s 512 --use-random --type luks2 luksFormat $PARTITION2
+echo "$ENCRYPTION_PASSPHRASE" | cryptsetup luksOpen $PARTITION2 cryptroot
 
 
 echo "Formatting the partitions"
-mkfs.fat -F32 -n LINUXEFI /dev/sda1
+mkfs.fat -F32 -n LINUXEFI $PARTITION1
 mkfs.btrfs -L Arch /dev/mapper/cryptroot
 
 
@@ -64,12 +73,12 @@ mkdir -p /mnt/{boot,home,.snapshots/root,.snapshots/home}
 mount -o compress=zstd,noatime,subvol=@home /dev/mapper/cryptroot /mnt/home
 mount -o compress=zstd,noatime,subvol=/snapshots/@ /dev/mapper/cryptroot /mnt/.snapshots/root
 mount -o compress=zstd,noatime,subvol=/snapshots/@home /dev/mapper/cryptroot /mnt/.snapshots/home
-mount /dev/sda1 /mnt/boot
+mount $PARTITION1 /mnt/boot
 
 
 
 echo "Installing Arch Linux"
-yes '' | pacstrap /mnt base base-devel linux linux-headers linux-firmware efibootmgr btrfs-progs e2fsprogs device-mapper $cpu_microcode cryptsetup networkmanager wget man-db man-pages neovim diffutils flatpak 
+yes '' | pacstrap /mnt $PACKAGES 
 
 
 echo "Generating fstab"
@@ -79,9 +88,10 @@ genfstab /mnt >> /mnt/etc/fstab
 echo "Configuring new system"
 arch-chroot /mnt /bin/bash << EOF
 
+
 echo "Setting system clock"
 timedatectl set-ntp true
-timedatectl set-timezone $continent_city
+timedatectl set-timezone $CONTINENT_CITY
 hwclock --systohc --localtime
 
 
@@ -130,21 +140,21 @@ COLOR_15=eceff4
 END
 
 echo "Setting hostname"
-echo $hostname > /etc/hostname
+echo $HOSTNAME > /etc/hostname
 
 
 echo "Setting root password"
-echo -en "$root_password\n$root_password" | passwd
+echo -en "$ROOT_PASSWORD\n$ROOT_PASSWORD" | passwd
 
 
 echo "Creating new user"
-useradd -m -G wheel,video -s /bin/bash $username
-echo -en "$user_password\n$user_password" | passwd $username
+useradd -m -G wheel,video -s /bin/bash $USERNAME
+echo -en "$USER_PASSWORD\n$USER_PASSWORD" | passwd $USERNAME
 
 
 echo "Generating initramfs"
-sed -i 's/^HOOKS.*/HOOKS=(base systemd block autodetect modconf keyboard sd-vconsole sd-encrypt filesystems)/' /etc/mkinitcpio.conf
-sed -i 's/^MODULES.*/MODULES=(btrfs $initramfs_modules)/' /etc/mkinitcpio.conf
+sed -i 's/^HOOKS.*/HOOKS=($INITRAMFS_HOOKS)/' /etc/mkinitcpio.conf
+sed -i 's/^MODULES.*/MODULES=($INITRAMFS_MODULES)/' /etc/mkinitcpio.conf
 sed -i 's/#COMPRESSION="lz4"/COMPRESSION="lz4"/g' /etc/mkinitcpio.conf
 mkinitcpio -P
 
@@ -156,16 +166,18 @@ tee -a /boot/loader/loader.conf << END
 default arch.conf
 timeout 0
 END
+
 mkdir -p /boot/loader/entries/
 touch /boot/loader/entries/arch.conf
+
 tee -a /boot/loader/entries/arch.conf << END
 title Arch Linux
 linux /vmlinuz-linux
 initrd /$cpu_microcode.img
 initrd /initramfs-linux.img
-options rd.luks.name=$(blkid -s UUID -o value /dev/vda2)=cryptroot root=/dev/mapper/cryptroot rootflags=subvol=@ rd.luks.options=discard$kernel_options nmi_watchdog=0 quiet rw
+options rd.luks.name=$(blkid -s UUID -o value /dev/vda2)=cryptroot root=/dev/mapper/cryptroot rootflags=subvol=@ $KERNEL_OPTIONS
 END
-                                                              #ro quiet loglevel=3 vt.global_cursor_default=0 rd.systemd.show_status=0 rd.udev.log-priority=3 i915.fastboot=1 nmi_watchdog=0
+
 echo "Setting up Pacman hook for automatic systemd-boot updates"
 mkdir -p /etc/pacman.d/hooks/
 touch /etc/pacman.d/hooks/systemd-boot.hook
@@ -191,7 +203,7 @@ echo "Creating swapfile"
 truncate -s 0 /swap/swapfile
 chattr +C /swap/swapfile
 btrfs property set /swap/swapfile compression none
-fallocate -l "$swap_size"G /swap/swapfile
+fallocate -l "$SWAP_SIZE"G /swap/swapfile
 
 echo "Setting correct permissions and formatting to swap"
 mkswap /swap/swapfile
