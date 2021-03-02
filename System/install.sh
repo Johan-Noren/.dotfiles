@@ -40,7 +40,8 @@ pacman -Sy --noconfirm
 
 
 echo "Creating partitions"
-printf "n\n1\n4096\n+512M\nef00\nw\ny\n" | gdisk $TARGET_DISK
+printf "o\nY\nw\n" | gdisk $TARGET_DISK
+printf "n\n1\n\n+512M\nef00\nw\ny\n" | gdisk $TARGET_DISK
 printf "n\n2\n\n\n8e00\nw\ny\n" | gdisk $TARGET_DISK
 
 
