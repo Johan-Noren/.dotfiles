@@ -92,7 +92,7 @@ mount -t btrfs -o subvol=home,$o_btrfs LABEL=system /mnt/home
 mount -t btrfs -o subvol=snapshots,$o_btrfs LABEL=system /mnt/.snapshots
 
 # Mount EFI
-mount LABEL=EFI /mnt/boot
+mount /dev/disk/by-disklabel/EFI /mnt/boot
 
 
 
