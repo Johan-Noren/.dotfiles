@@ -6,9 +6,9 @@
 # iwctl station wlan0 get-networks
 # iwctl station wlan0 connect <SSID>
 
-ENCRYPTION_PASSPHRASE=""
-ROOT_PASSWORD=""
-USER_PASSWORD=""
+ENCRYPTION_PASSPHRASE="temp"
+ROOT_PASSWORD="lemp"
+USER_PASSWORD="pemp"
 HOSTNAME="hosty"
 USERNAME="testu"
 CONTINENT_CITY="Europe/Stockholm"
@@ -92,6 +92,8 @@ mount -t btrfs -o subvol=home,$o_btrfs LABEL=system /mnt/home
 mount -t btrfs -o subvol=snapshots,$o_btrfs LABEL=system /mnt/.snapshots
 
 # Mount EFI
+
+mkdir /mnt/boot
 mount /dev/disk/by-disklabel/EFI /mnt/boot
 
 
