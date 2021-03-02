@@ -41,8 +41,8 @@ pacman -Sy --noconfirm
 
 echo "Creating partitions"
 printf "o\nY\nw\n" | gdisk $TARGET_DISK
-printf "n\n1\n\n+512M\nef00\nw\ny\n" | gdisk $TARGET_DISK
-printf "n\n2\n\n\n8e00\nw\ny\n" | gdisk $TARGET_DISK
+printf "n\n1\n\n+512M\n8200\nw\ny\n" | gdisk $TARGET_DISK
+printf "n\n2\n\n\n8300\nw\ny\n" | gdisk $TARGET_DISK
 
 
 echo "Setting up cryptographic volume"
