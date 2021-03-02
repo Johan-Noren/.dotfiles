@@ -7,8 +7,8 @@
 ENCRYPTION_PASSPHRASE=""
 ROOT_PASSWORD=""
 USER_PASSWORD=""
-HOSTNAME=""
-USERNAME="tesu"
+HOSTNAME="hosty"
+USERNAME="testu"
 CONTINENT_CITY="Europe/Stockholm"
 
 TARGET_DISK="/dev/sda"
@@ -31,7 +31,7 @@ INITRAMFS_MODULES="intel_agp i915 btrfs"
 INITRAMFS_HOOKS="base systemd block autodetect modconf keyboard sd-vconsole sd-encrypt filesystems"
 
 # Sets packages to be installed
-PACKAGES="base base-devel linux linux-headers linux-firmware efibootmgr btrfs-progs e2fsprogs device-mapper $CPU_MICROCODE cryptsetup networkmanager wget man-db man-pages neovim diffutils flatpak"
+PACKAGES="base base-devel linux linux-headers linux-firmware efibootmgr btrfs-progs e2fsprogs device-mapper $CPU_MICROCODE zsh cryptsetup networkmanager wget man-db man-pages neovim diffutils flatpak"
 
 
 echo "Updating system clock"
