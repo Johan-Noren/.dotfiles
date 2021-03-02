@@ -94,7 +94,7 @@ mount -t btrfs -o subvol=snapshots,$o_btrfs LABEL=system /mnt/.snapshots
 # Mount EFI
 
 mkdir /mnt/boot
-mount /dev/disk/by-disklabel/EFI /mnt/boot
+mount /dev/disk/by-partlabel/EFI /mnt/boot
 
 
 
@@ -196,7 +196,7 @@ title Arch Linux
 linux /vmlinuz-linux
 initrd /$CPU_MICROCODE.img
 initrd /initramfs-linux.img
-options rd.luks.name=$(blkid -s UUID -o value /dev/disk/by-disklabel/cryptsystem)=cryptsystem root=/dev/mapper/system rootflags=subvol=@ $KERNEL_OPTIONS
+options rd.luks.name=$(blkid -s UUID -o value /dev/disk/by-partlabel/cryptsystem)=cryptsystem root=/dev/mapper/system rootflags=subvol=@ $KERNEL_OPTIONS
 END
 
 echo "Setting up Pacman hook for automatic systemd-boot updates"
