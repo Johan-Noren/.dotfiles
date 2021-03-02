@@ -192,7 +192,7 @@ touch /boot/loader/entries/arch.conf
 tee -a /boot/loader/entries/arch.conf << END
 title Arch Linux
 linux /vmlinuz-linux
-initrd /$cpu_microcode.img
+initrd /$CPU_MICROCODE.img
 initrd /initramfs-linux.img
 options rd.luks.name=$(blkid -s UUID -o value /dev/disk/by-disklabel/cryptsystem)=cryptsystem root=/dev/mapper/system rootflags=subvol=@ $KERNEL_OPTIONS
 END
