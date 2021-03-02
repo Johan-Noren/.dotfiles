@@ -2,7 +2,9 @@
 
 # before
 # loadkeys sv-latin1
-# iwctl 
+# iwctl station wlan0 scan
+# iwctl station wlan0 get-networks
+# iwctl station wlan0 connect <SSID>
 
 ENCRYPTION_PASSPHRASE=""
 ROOT_PASSWORD=""
