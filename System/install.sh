@@ -1,18 +1,21 @@
 #!/bin/bash
 
+# before
+# loadkeys sv-latin1
+# iwctl 
 
 ENCRYPTION_PASSPHRASE=""
 ROOT_PASSWORD=""
 USER_PASSWORD=""
 HOSTNAME=""
-USERNAME=""
+USERNAME="tesu"
 CONTINENT_CITY="Europe/Stockholm"
 
 TARGET_DISK="/dev/sda"
-PARTITION1="$TARGET_DISK1"
-PARTITION2="$TARGET_DISK2"
-PARTITION3="$TARGET_DISK3"
-PARTITION4="$TARGET_DISK4"
+PARTITION1="${TARGET_DISK1}"
+PARTITION2="${TARGET_DISK2}"
+PARTITION3="${TARGET_DISK3}"
+PARTITION4="${TARGET_DISK4}"
 SWAP_SIZE="8" # same as ram if using hibernation, otherwise minimum of 8
 
 # Set different microcode, kernel params and initramfs modules according to CPU vendor
@@ -40,8 +43,8 @@ pacman -Sy --noconfirm
 
 
 echo "Creating partitions"
-printf "o\nY\nw\n" | gdisk $TARGET_DISK
-printf "n\n1\n\n+512M\n8200\nw\ny\n" | gdisk $TARGET_DISK
+printf "o\nY\nw\nY\n" | gdisk $TARGET_DISK
+printf "n\n1\n\n+512M\nef00\nw\ny\n" | gdisk $TARGET_DISK
 printf "n\n2\n\n\n8300\nw\ny\n" | gdisk $TARGET_DISK
 
 
