@@ -20,7 +20,7 @@ alias ls='ls --color=auto'
 
 # PROMPT
 export PS1='
-%B%F{red}[%d]%f%b '
+%B%F{white}%d%f%b '
 
 unset GLOBAL_RCS
 
@@ -32,11 +32,3 @@ export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
 export EDITOR=/bin/nvim
 export BROWSER=/bin/firefox
 export GTK_THEME='Adwaita:dark'
-
-# AUTOSTART SWAY ON LOGIN
-if [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]]; then
-	sleep 2
-	echo "\e[31mBORK BORK BORK----------------------------------------------------\e[0m" >> ~/.sway.log
-	exec sway >> ~/.sway.log 2>&1 
-fi
-
