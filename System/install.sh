@@ -79,11 +79,8 @@ mount -t btrfs -o subvol=home,$o_btrfs LABEL=system /mnt/home
 mount -t btrfs -o subvol=snapshots,$o_btrfs LABEL=system /mnt/.snapshots
 
 # Mount EFI
-
 mkdir /mnt/boot
 mount /dev/disk/by-partlabel/EFI /mnt/boot
-
-
 
 echo "Installing Arch Linux"
 yes '' | pacstrap /mnt $PACKAGES 
@@ -183,7 +180,7 @@ title Arch Linux
 linux /vmlinuz-linux
 initrd /$CPU_MICROCODE.img
 initrd /initramfs-linux.img
-options rd.luks.name=$(blkid -s PARTUUID -o value /dev/disk/by-partlabel/cryptsystem)=cryptsystem root=UUID=$(blkid -s UUID -o value /dev/disk/by-partlabel/cryptsystem)  rootflags=subvol=@ $KERNEL_OPTIONS
+options luks.name=$(blkid -s PARTUUID -o value /dev/disk/by-partlabel/cryptsystem)=cryptsystem root=UUID=$(blkid -s UUID -o value /dev/disk/by-partlabel/cryptsystem)  rootflags=subvol=@ $KERNEL_OPTIONS
 END
 
 echo "Setting up Pacman hook for automatic systemd-boot updates"
@@ -201,9 +198,6 @@ When = PostTransaction
 Exec = /usr/bin/bootctl update
 END
 
-
-echo "Mounting swapfile subvolume"
-mkdir /swap
 
 echo "Setting swappiness to 20"
 touch /etc/sysctl.d/99-swappiness.conf
