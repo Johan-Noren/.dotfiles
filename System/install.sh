@@ -6,6 +6,7 @@
 # iwctl station wlan0 get-networks
 # iwctl station wlan0 connect <SSID>
 
+## VARIABLES ##
 ENCRYPTION_PASSPHRASE="temp"
 ROOT_PASSWORD="lemp"
 USER_PASSWORD="pemp"
@@ -14,17 +15,9 @@ USERNAME="testu"
 CONTINENT_CITY="Europe/Stockholm"
 
 TARGET_DISK="/dev/sda"
-#PARTITION1="${TARGET_DISK}1"
-#PARTITION2="${TARGET_DISK}2"
-#PARTITION3="${TARGET_DISK}3"
-#PARTITION4="${TARGET_DISK}4"
-SWAP_SIZE="8" # same as ram if using hibernation, otherwise minimum of 8
 
-# Set different microcode, kernel params and initramfs modules according to CPU vendor
-CPU_VENDOR=$(cat /proc/cpuinfo | grep vendor | uniq)
+# Kernel options
 CPU_MICROCODE="intel-ucode"
-
-# Kernel options to
 KERNEL_OPTIONS="i915.fastboot=1 i915.enable_fbc=1 i915.enable_guc=2 rw quiet loglevel=3 vt.global_cursor_default=0  
 rd.luks.options=discard rd.systemd.show_status=0 rd.udev.log-priority=3 nmi_watchdog=0"
 
@@ -35,20 +28,14 @@ INITRAMFS_HOOKS="base systemd block autodetect modconf keyboard sd-vconsole sd-e
 # Sets packages to be installed
 PACKAGES="base base-devel linux linux-headers linux-firmware efibootmgr btrfs-progs e2fsprogs device-mapper $CPU_MICROCODE zsh cryptsetup networkmanager wget man-db man-pages neovim diffutils flatpak"
 
-
 echo "Updating system clock"
 timedatectl set-ntp true
-
 
 echo "Syncing packages database"
 pacman -Sy --noconfirm
 
-
+## SETTING UP DISKS
 echo "Creating partitions"
-#printf "o\nY\nw\nY\n" | gdisk $TARGET_DISK
-#printf "n\n1\n\n+512M\nef00\nw\ny\n" | gdisk $TARGET_DISK
-#printf "n\n2\n\n\n8300\nw\ny\n" | gdisk $TARGET_DISK
-
 sgdisk --clear \
        --new=1:0:+550MiB --typecode=1:ef00    --change-name=1:EFI \
        --new=2:0:+8GiB   --typecode=2:8200    --change-name=2:cryptswap \
@@ -196,7 +183,7 @@ title Arch Linux
 linux /vmlinuz-linux
 initrd /$CPU_MICROCODE.img
 initrd /initramfs-linux.img
-options rd.luks.name=$(blkid -s UUID -o value /dev/disk/by-partlabel/cryptsystem)=cryptsystem root=/dev/mapper/system rootflags=subvol=@ $KERNEL_OPTIONS
+options rd.luks.name=$(blkid -s PARTUUID -o value /dev/disk/by-partlabel/cryptsystem)=cryptsystem root=UUID=$(blkid -s UUID -o value /dev/disk/by-partlabel/cryptsystem)  rootflags=subvol=@ $KERNEL_OPTIONS
 END
 
 echo "Setting up Pacman hook for automatic systemd-boot updates"
