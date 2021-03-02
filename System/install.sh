@@ -181,7 +181,7 @@ title Arch Linux
 linux /vmlinuz-linux
 initrd /$cpu_microcode.img
 initrd /initramfs-linux.img
-options rd.luks.name=$(blkid -s UUID -o value /dev/vda2)=cryptroot root=/dev/mapper/cryptroot rootflags=subvol=@ $KERNEL_OPTIONS
+options rd.luks.name=$(blkid -s UUID -o value ${PARTITION2})=cryptroot root=/dev/mapper/cryptroot rootflags=subvol=@ $KERNEL_OPTIONS
 END
 
 echo "Setting up Pacman hook for automatic systemd-boot updates"
@@ -243,8 +243,8 @@ EOF
 
 
 echo "Cleaning up"
-umount -R /mnt
-swapoff -a
+#umount -R /mnt
+#swapoff -a
 
 
-echo "Arch Linux is ready. You can reboot now!"
+#echo "Arch Linux is ready. You can reboot now!"
