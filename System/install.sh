@@ -90,7 +90,7 @@ yes '' | pacstrap /mnt $PACKAGES
 
 ## GENERATING FSTAB AND CRYPTTAB ##
 echo "Generating fstab"
-genfstab /mnt >> /mnt/etc/fstab
+genfstab -L -p /mnt >> /mnt/etc/fstab
 
 # Fixes for swap
 sed -i 's:/dev/mapper/swap:/dev/mapper/cryptswap:g' /mnt/etc/fstab
@@ -217,16 +217,17 @@ systemctl enable fstrim.timer
 
 
 echo "Installing UDEV rules"
-tee -a /mnt/etc/udev/rules.d/40-disable_wakeup_from_xhc1.rules << END
+touch 
+tee /mnt/etc/udev/rules.d/40-disable_wakeup_from_xhc1.rules << END
 SUBSYSTEM=="pci", KERNEL=="0000:00:14.0", ATTR{power/wakeup}="disabled"
 END
 
-tee -a /mnt/etc/udev/rules.d/50-allow_user_to_change_backlight.rules << END
+tee /mnt/etc/udev/rules.d/50-allow_user_to_change_backlight.rules << END
 ACTION=="add", SUBSYSTEM=="backlight", RUN+="/bin/chgrp wheel /sys/class/backlight/%k/brightness"
 ACTION=="add", SUBSYSTEM=="backlight", RUN+="/bin/chmod g+w /sys/class/backlight/%k/brightness"
 END
 
-tee -a /mnt/etc/udev/rules.d/51-allow_user_to_change_kbd_led.rules << END
+tee /mnt/etc/udev/rules.d/51-allow_user_to_change_kbd_led.rules << END
 ACTION=="add", KERNEL=="smc::kbd_backlight", SUBSYSTEM=="leds", RUN+="/bin/chgrp wheel /sys/class/leds/smc::kbd_backlight/brightness"
 ACTION=="add", KERNEL=="smc::kbd_backlight", SUBSYSTEM=="leds", RUN+="/bin/chmod g+w /sys/class/leds/smc::kbd_backlight/brightness"
 END
@@ -237,7 +238,7 @@ echo "kernel.printk = 3 3 3 3" > /mnt/etc/sysctl.d/10-hush-kernel.conf
 
 
 echo "Installing systemd services"
-tee -a /mnt/etc/systemd/system/disable_gpe4E.service << END
+tee /mnt/etc/systemd/system/disable_gpe4E.service << END
 [Unit]
 Description=the service that disables GPE 4E, an interrupt that is going crazy on Macs
 
