@@ -29,6 +29,11 @@ INITRAMFS_HOOKS="base systemd block autodetect modconf keyboard sd-vconsole sd-e
 # Sets packages to be installed
 PACKAGES="base base-devel linux linux-headers linux-firmware efibootmgr btrfs-progs e2fsprogs device-mapper $CPU_MICROCODE zsh cryptsetup networkmanager wget man-db man-pages neovim diffutils flatpak"
 
+# Setting mountflags
+MOUNT_OPTIONS="defaults,x-mount.mkdir"
+MOUNT_OPTIONS_BTRFS="${MOUNT_OPTIONS},compress=lzo,ssd,noatime"
+
+
 echo "Updating system clock"
 timedatectl set-ntp true
 
@@ -54,10 +59,6 @@ mkfs.fat -F32 -n LINUXEFI /dev/disk/by-partlabel/EFI
 
 
 echo "Setting up BTRFS"
-# Setting mountflags
-o="defaults,x-mount.mkdir"
-o_btrfs="${o},compress=lzo,ssd,noatime"
-
 # Temporarily mount system
 mkfs.btrfs -L systemPartition /dev/mapper/systemPartition
 mount -t btrfs LABEL=systemPartition /mnt
@@ -72,9 +73,9 @@ btrfs subvol create /mnt/snapshots
 umount -R /mnt
 
 # Mount subvolumes
-mount -t btrfs -o subvol=root,$o_btrfs LABEL=systemPartition /mnt
-mount -t btrfs -o subvol=home,$o_btrfs LABEL=systemPartition /mnt/home
-mount -t btrfs -o subvol=snapshots,$o_btrfs LABEL=systemPartition /mnt/.snapshots
+mount -t btrfs -o subvol=root,$MOUNT_OPTIONS_BTRFS LABEL=systemPartition /mnt
+mount -t btrfs -o subvol=home,$MOUNT_OPTIONS_BTRFS LABEL=systemPartition /mnt/home
+mount -t btrfs -o subvol=snapshots,$MOUNT_OPTIONS_BTRFS LABEL=systemPartition /mnt/.snapshots
 
 # Mount EFI
 mkdir /mnt/boot
