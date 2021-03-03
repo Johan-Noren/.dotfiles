@@ -18,8 +18,7 @@ TARGET_DISK="/dev/sda"
 
 # Kernel options
 CPU_MICROCODE="intel-ucode"
-KERNEL_OPTIONS="i915.fastboot=1 i915.enable_fbc=1 i915.enable_guc=2 rw quiet loglevel=3 vt.global_cursor_default=0  
-rd.luks.options=discard rd.systemd.show_status=0 rd.udev.log-priority=3 nmi_watchdog=0"
+KERNEL_OPTIONS="i915.fastboot=1 i915.enable_fbc=1 i915.enable_guc=2 rw quiet loglevel=3 vt.global_cursor_default=0 rd.luks.options=discard rd.systemd.show_status=0 rd.udev.log-priority=3 nmi_watchdog=0"
 
 # The mkinitcpio.conf file will be modified with the modules and hooks below
 INITRAMFS_MODULES="intel_agp i915 btrfs"
