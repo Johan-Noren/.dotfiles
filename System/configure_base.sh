@@ -32,7 +32,7 @@ sudo pacman -S --noconfirm ffmpeg libva-utils libva-vdpau-driver vdpauinfo
 
 
 echo "Installing common applications"
-sudo pacman -S --noconfirm  openssh links htop powertop p7zip ripgrep unzip fwupd unrar
+sudo pacman -S --noconfirm  openssh links htop powertop p7zip git ripgrep unzip fwupd unrar
 
 
 echo "Configuring shell"
@@ -100,7 +100,7 @@ rm -rf yay-bin
 echo "Installing and configuring Plymouth"
 yay -S --noconfirm plymouth-git
 sudo sed -i 's/base systemd block/base systemd sd-plymouth block/g' /etc/mkinitcpio.conf
-sudo sed -i 's/nmi_watchdog=0/nmi_watchdog=0 splash/g' /boot/loader/entries/arch.conf
+sudo sed -i 's/rd.udev.log-priority=3 nmi_watchdog=0/rd.udev.log-priority=3 splash nmi_watchdog=0/g' /boot/loader/entries/arch.conf
 sudo mkinitcpio -p linux
 sudo plymouth-set-default-theme -R bgrt
 
