@@ -203,7 +203,7 @@ title Arch Linux
 linux /vmlinuz-linux
 initrd /$CPU_MICROCODE.img
 initrd /initramfs-linux.img
-options luks.name=$(blkid -s UUID -o value /dev/sda3)=encryptedSystemPartition root=UUID=$(blkid -s UUID -o value /dev/mapper/systemPartition) rootflags=subvol=root $KERNEL_OPTIONS
+options luks.name=$(blkid -s UUID -o value /dev/sda2)=encryptedSystemPartition root=UUID=$(blkid -s UUID -o value /dev/mapper/systemPartition) rootflags=subvol=root $KERNEL_OPTIONS
 END
 
 
@@ -291,36 +291,36 @@ systemctl enable fstrim.timer
 
 
 echo "Installing UDEV rules"
-mkdir -p /mnt/etc/udev/rules.d
+#mkdir -p /etc/udev/rules.d
 
-touch /mnt/etc/udev/rules.d/40-disable_wakeup_from_xhc1.rules
-tee -a /mnt/etc/udev/rules.d/40-disable_wakeup_from_xhc1.rules << END
+#touch /mnt/etc/udev/rules.d/40-disable_wakeup_from_xhc1.rules
+tee -a /etc/udev/rules.d/40-disable_wakeup_from_xhc1.rules << END
 SUBSYSTEM=="pci", KERNEL=="0000:00:14.0", ATTR{power/wakeup}="disabled"
 END
 
-touch /mnt/etc/udev/rules.d/50-allow_user_to_change_backlight.rules 
-tee -a /mnt/etc/udev/rules.d/50-allow_user_to_change_backlight.rules << END
+#touch /mnt/etc/udev/rules.d/50-allow_user_to_change_backlight.rules 
+tee -a /etc/udev/rules.d/50-allow_user_to_change_backlight.rules << END
 ACTION=="add", SUBSYSTEM=="backlight", RUN+="/bin/chgrp wheel /sys/class/backlight/%k/brightness"
 ACTION=="add", SUBSYSTEM=="backlight", RUN+="/bin/chmod g+w /sys/class/backlight/%k/brightness"
 END
 
-touch /mnt/etc/udev/rules.d/51-allow_user_to_change_kbd_led.rules 
-tee -a /mnt/etc/udev/rules.d/51-allow_user_to_change_kbd_led.rules << END
+#touch /mnt/etc/udev/rules.d/51-allow_user_to_change_kbd_led.rules 
+tee -a /etc/udev/rules.d/51-allow_user_to_change_kbd_led.rules << END
 ACTION=="add", KERNEL=="smc::kbd_backlight", SUBSYSTEM=="leds", RUN+="/bin/chgrp wheel /sys/class/leds/smc::kbd_backlight/brightness"
 ACTION=="add", KERNEL=="smc::kbd_backlight", SUBSYSTEM=="leds", RUN+="/bin/chmod g+w /sys/class/leds/smc::kbd_backlight/brightness"
 END
 
 
 echo "Setting kernel to hush"
-mkdir -p /mnt/etc/sysctl.d/
-touch /mnt/etc/sysctl.d/10-hush-kernel.conf
-echo "kernel.printk = 3 3 3 3" > /mnt/etc/sysctl.d/10-hush-kernel.conf
+#mkdir -p /etc/sysctl.d/
+#touch /etc/sysctl.d/10-hush-kernel.conf
+echo "kernel.printk = 3 3 3 3" > /etc/sysctl.d/10-hush-kernel.conf
 
 
 echo "Installing systemd services"
-mkdir -p /mnt/etc/systemd/system
-touch /mnt/etc/systemd/system/disable_gpe4E.service
-tee -a /mnt/etc/systemd/system/disable_gpe4E.service << END
+#mkdir -p /mnt/etc/systemd/system
+touch /etc/systemd/system/disable_gpe4E.service
+tee -a /etc/systemd/system/disable_gpe4E.service << END
 [Unit]
 Description=the service that disables GPE 4E, an interrupt that is going crazy on Macs
 
@@ -330,6 +330,7 @@ ExecStart=/usr/bin/bash -c 'echo "disable" > /sys/firmware/acpi/interrupts/gpe4E
 [Install]
 WantedBy=multi-user.target
 END
+
 systemctl enable disable_gpe4E
 
 
