@@ -33,6 +33,8 @@ PACKAGES="base base-devel linux linux-headers linux-firmware efibootmgr btrfs-pr
 MOUNT_OPTIONS="defaults,x-mount.mkdir"
 MOUNT_OPTIONS_BTRFS="${MOUNT_OPTIONS},compress=lzo,ssd,noatime"
 
+# Swap size
+SWAP_SIZE="8"
 
 echo "Updating system clock"
 timedatectl set-ntp true
@@ -228,16 +230,31 @@ When = PostTransaction
 Exec = /usr/bin/bootctl update
 END
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 echo "Setting up swap"
 echo "Mounting swapfile subvolume"
 mkdir /swap
-mount -o noatime,subvol=@swap /dev/mapper/systemPartition /swap
+mount -o noatime,subvol=swap /dev/mapper/systemPartition /swap
 
 echo "Creating swapfile"
 truncate -s 0 /swap/swapfile
 chattr +C /swap/swapfile
 btrfs property set /swap/swapfile compression none
-fallocate -l "$swap_size"G /swap/swapfile
+fallocate -l "$SWAP_SIZE"G /swap/swapfile
 
 echo "Setting correct permissions and formatting to swap"
 mkswap /swap/swapfile
@@ -258,11 +275,24 @@ touch /etc/sysctl.d/99-swappiness.conf
 echo 'vm.swappiness=20' > /etc/sysctl.d/99-swappiness.conf
 
 
+
+
+
+
+
+
+
+
+
+
+
 echo "Enabling periodic TRIM"
 systemctl enable fstrim.timer
 
 
 echo "Installing UDEV rules"
+mkdir -p /mnt/etc/udev/rules.d
+
 touch /mnt/etc/udev/rules.d/40-disable_wakeup_from_xhc1.rules
 tee -a /mnt/etc/udev/rules.d/40-disable_wakeup_from_xhc1.rules << END
 SUBSYSTEM=="pci", KERNEL=="0000:00:14.0", ATTR{power/wakeup}="disabled"
@@ -282,11 +312,13 @@ END
 
 
 echo "Setting kernel to hush"
+mkdir -p /mnt/etc/sysctl.d/
 touch /mnt/etc/sysctl.d/10-hush-kernel.conf
 echo "kernel.printk = 3 3 3 3" > /mnt/etc/sysctl.d/10-hush-kernel.conf
 
 
 echo "Installing systemd services"
+mkdir -p /mnt/etc/systemd/system
 touch /mnt/etc/systemd/system/disable_gpe4E.service
 tee -a /mnt/etc/systemd/system/disable_gpe4E.service << END
 [Unit]
