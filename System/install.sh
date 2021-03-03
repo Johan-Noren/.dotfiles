@@ -23,6 +23,7 @@ rd.luks.options=discard rd.systemd.show_status=0 rd.udev.log-priority=3 nmi_watc
 
 # The mkinitcpio.conf file will be modified with the modules and hooks below
 INITRAMFS_MODULES="intel_agp i915 btrfs"
+INITRAMFS_BINARIES="btrfs"
 INITRAMFS_HOOKS="base systemd block autodetect modconf keyboard sd-vconsole sd-encrypt filesystems"
 
 # Sets packages to be installed
@@ -160,6 +161,7 @@ echo -en "$USER_PASSWORD\n$USER_PASSWORD" | passwd $USERNAME
 echo "Generating initramfs"
 sed -i 's/^HOOKS.*/HOOKS=($INITRAMFS_HOOKS)/' /etc/mkinitcpio.conf
 sed -i 's/^MODULES.*/MODULES=($INITRAMFS_MODULES)/' /etc/mkinitcpio.conf
+sed -i 's/^BINARIES.*/BINARIES=($INITRAMFS_BINARIES)/' /etc/mkinitcpio.conf
 sed -i 's/#COMPRESSION="lz4"/COMPRESSION="lz4"/g' /etc/mkinitcpio.conf
 mkinitcpio -P
 
@@ -180,7 +182,7 @@ title Arch Linux
 linux /vmlinuz-linux
 initrd /$CPU_MICROCODE.img
 initrd /initramfs-linux.img
-options luks.name=$(blkid -s PARTUUID -o value /dev/disk/by-partlabel/cryptsystem)=cryptsystem root=UUID=$(blkid -s UUID -o value /dev/disk/by-partlabel/cryptsystem)  rootflags=subvol=@ $KERNEL_OPTIONS
+options luks.name=$(blkid -s UUID -o value ${TARGET_DISK})=cryptsystem root=UUID=$(blkid -s UUID -o value /dev/mapper/cryptsystem)  rootflags=subvol=root $KERNEL_OPTIONS
 END
 
 echo "Setting up Pacman hook for automatic systemd-boot updates"
