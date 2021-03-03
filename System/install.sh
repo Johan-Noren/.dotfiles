@@ -35,15 +35,15 @@ timedatectl set-ntp true
 echo "Syncing packages database"
 pacman -Sy --noconfirm
 
-## SETTING UP DISKS
+
+## SETTING UP DISKS ##
 echo "Creating partitions"
 sgdisk --clear \
        --new=1:0:+550MiB --typecode=1:ef00    --change-name=1:EFI \
        --new=2:0:+8GiB   --typecode=2:8200    --change-name=2:cryptswap \
        --new=3:0:0       --typecode=3:8300    --change-name=3:cryptsystem \
        $TARGET_DISK
-       
-      
+           
 echo "Setting up cryptographic volume"
 mkdir -p -m0700 /run/cryptsetup
 echo "$ENCRYPTION_PASSPHRASE" | cryptsetup -q -h sha512 -s 512 --use-random --type luks2 luksFormat /dev/disk/by-partlabel/cryptsystem
@@ -83,22 +83,25 @@ mount -t btrfs -o subvol=snapshots,$o_btrfs LABEL=system /mnt/.snapshots
 mkdir /mnt/boot
 mount /dev/disk/by-partlabel/EFI /mnt/boot
 
+## INSTALLING PACKAGES ##
 echo "Installing Arch Linux"
 yes '' | pacstrap /mnt $PACKAGES 
 
 
+## GENERATING FSTAB AND CRYPTTAB ##
 echo "Generating fstab"
 genfstab /mnt >> /mnt/etc/fstab
 
 # Fixes for swap
 sed -i 's:/dev/mapper/swap:/dev/mapper/cryptswap:g' /mnt/etc/fstab
+
+# Generating crypttab
 tee -a /mnt/etc/crypttab << END
 cryptswap        /dev/disk/by-partlabel/cryptswap        /dev/urandom        swap,offset=2048,cipher=aes-xts-plain64,size=256
 END
 
 echo "Configuring new system"
 arch-chroot /mnt /bin/bash << EOF
-
 
 echo "Setting system clock"
 timedatectl set-ntp true
@@ -181,19 +184,17 @@ END
 
 mkdir -p /boot/loader/entries/
 touch /boot/loader/entries/arch.conf
-
 tee -a /boot/loader/entries/arch.conf << END
 title Arch Linux
 linux /vmlinuz-linux
 initrd /$CPU_MICROCODE.img
 initrd /initramfs-linux.img
-options luks.name=$(blkid -s UUID -o value ${TARGET_DISK})=cryptsystem root=UUID=$(blkid -s UUID -o value /dev/mapper/cryptsystem)  rootflags=subvol=root $KERNEL_OPTIONS
+options luks.name=$(blkid -s UUID -o value ${TARGET_DISK})=cryptsystem root=UUID=$(blkid -s UUID -o value /dev/mapper/cryptsystem) rootflags=subvol=root $KERNEL_OPTIONS
 END
 
 echo "Setting up Pacman hook for automatic systemd-boot updates"
 mkdir -p /etc/pacman.d/hooks/
 touch /etc/pacman.d/hooks/systemd-boot.hook
-
 tee -a /etc/pacman.d/hooks/systemd-boot.hook << END
 [Trigger]
 Type = Package
@@ -215,6 +216,40 @@ echo "Enabling periodic TRIM"
 systemctl enable fstrim.timer
 
 
+echo "Installing UDEV rules"
+tee -a /mnt/etc/udev/rules.d/40-disable_wakeup_from_xhc1.rules << END
+SUBSYSTEM=="pci", KERNEL=="0000:00:14.0", ATTR{power/wakeup}="disabled"
+END
+
+tee -a /mnt/etc/udev/rules.d/50-allow_user_to_change_backlight.rules << END
+ACTION=="add", SUBSYSTEM=="backlight", RUN+="/bin/chgrp wheel /sys/class/backlight/%k/brightness"
+ACTION=="add", SUBSYSTEM=="backlight", RUN+="/bin/chmod g+w /sys/class/backlight/%k/brightness"
+END
+
+tee -a /mnt/etc/udev/rules.d/51-allow_user_to_change_kbd_led.rules << END
+ACTION=="add", KERNEL=="smc::kbd_backlight", SUBSYSTEM=="leds", RUN+="/bin/chgrp wheel /sys/class/leds/smc::kbd_backlight/brightness"
+ACTION=="add", KERNEL=="smc::kbd_backlight", SUBSYSTEM=="leds", RUN+="/bin/chmod g+w /sys/class/leds/smc::kbd_backlight/brightness"
+END
+
+
+echo "Setting kernel to hush"
+echo "kernel.printk = 3 3 3 3" > /mnt/etc/sysctl.d/10-hush-kernel.conf
+
+
+echo "Installing systemd services"
+tee -a /mnt/etc/systemd/system/disable_gpe4E.service << END
+[Unit]
+Description=the service that disables GPE 4E, an interrupt that is going crazy on Macs
+
+[Service]
+ExecStart=/usr/bin/bash -c 'echo "disable" > /sys/firmware/acpi/interrupts/gpe4E'
+
+[Install]
+WantedBy=multi-user.target
+END
+systemctl enable disable_gpe4E
+
+
 echo "Enabling NetworkManager"
 systemctl enable NetworkManager
 
@@ -223,10 +258,9 @@ echo "Adding user as a sudoer"
 echo '%wheel ALL=(ALL) ALL' | EDITOR='tee -a' visudo
 EOF
 
-
 echo "Cleaning up"
 #umount -R /mnt
 #swapoff -a
 
 
-#echo "Arch Linux is ready. You can reboot now!"
+#echo "Sequence finished."
