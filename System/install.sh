@@ -189,7 +189,7 @@ title Arch Linux
 linux /vmlinuz-linux
 initrd /$CPU_MICROCODE.img
 initrd /initramfs-linux.img
-options luks.name=$(blkid -s UUID -o value ${TARGET_DISK})=cryptsystem root=UUID=$(blkid -s UUID -o value /dev/mapper/cryptsystem) rootflags=subvol=root $KERNEL_OPTIONS
+options luks.name=$(blkid -s UUID -o value /dev/sda3)=cryptsystem root=UUID=$(blkid -s UUID -o value /dev/mapper/system)=system rootflags=subvol=root $KERNEL_OPTIONS
 END
 
 echo "Setting up Pacman hook for automatic systemd-boot updates"
