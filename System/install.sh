@@ -33,7 +33,7 @@ MOUNT_OPTIONS="defaults,x-mount.mkdir"
 MOUNT_OPTIONS_BTRFS="${MOUNT_OPTIONS},compress=lzo,ssd,noatime"
 
 # Swap size
-SWAP_SIZE="8"
+SWAP_SIZE="16"
 
 echo "Updating system clock"
 timedatectl set-ntp true
@@ -48,7 +48,6 @@ sgdisk --clear \
        --new=1:0:+550MiB --typecode=1:ef00    --change-name=1:EFI \
        --new=2:0:0       --typecode=2:8300    --change-name=2:encryptedSystemPartition \
        $TARGET_DISK
-       #--new=2:0:+8GiB   --typecode=2:8200    --change-name=2:cryptswap \
            
 echo "Setting up cryptographic volume"
 mkdir -p -m0700 /run/cryptsetup
@@ -91,6 +90,8 @@ yes '' | pacstrap /mnt $PACKAGES
 echo "Generating fstab"
 genfstab -L -p /mnt >> /mnt/etc/fstab
 
+# Add swap-partition
+echo "LABEL=systemPartition /swap  btrfs  rw,noatime,ssd,space_cache,subvol=/swap,subvol=swap     0 0" >> /mnt/etc/fstab
 
   ## THROW AWAY SOON ##
   #echo "Setting up swap"
@@ -187,14 +188,6 @@ default arch.conf
 timeout 0
 END
 
-
-
-
-
-
-
-
-
 mkdir -p /boot/loader/entries/
 touch /boot/loader/entries/arch.conf
 tee -a /boot/loader/entries/arch.conf << END
@@ -202,17 +195,8 @@ title Arch Linux
 linux /vmlinuz-linux
 initrd /$CPU_MICROCODE.img
 initrd /initramfs-linux.img
-options luks.name=$(blkid -s UUID -o value /dev/sda2)=encryptedSystemPartition root=UUID=$(blkid -s UUID -o value /dev/mapper/systemPartition) rootflags=subvol=root $KERNEL_OPTIONS
+options luks.name=$(blkid -s UUID -o value /dev/sda2)=systemPartition root=UUID=$(blkid -s UUID -o value /dev/mapper/systemPartition) rootflags=subvol=root $KERNEL_OPTIONS
 END
-
-
-
-
-
-
-
-
-
 
 
 echo "Setting up Pacman hook for automatic systemd-boot updates"
@@ -228,20 +212,6 @@ Description = Updating systemd-boot
 When = PostTransaction
 Exec = /usr/bin/bootctl update
 END
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 echo "Setting up swap"
@@ -274,30 +244,16 @@ touch /etc/sysctl.d/99-swappiness.conf
 echo 'vm.swappiness=20' > /etc/sysctl.d/99-swappiness.conf
 
 
-
-
-
-
-
-
-
-
-
-
-
 echo "Enabling periodic TRIM"
 systemctl enable fstrim.timer
 
 
 echo "Installing UDEV rules"
-#mkdir -p /etc/udev/rules.d
 
-#touch /mnt/etc/udev/rules.d/40-disable_wakeup_from_xhc1.rules
 tee -a /etc/udev/rules.d/40-disable_wakeup_from_xhc1.rules << END
 SUBSYSTEM=="pci", KERNEL=="0000:00:14.0", ATTR{power/wakeup}="disabled"
 END
 
-#touch /mnt/etc/udev/rules.d/50-allow_user_to_change_backlight.rules 
 tee -a /etc/udev/rules.d/50-allow_user_to_change_backlight.rules << END
 ACTION=="add", SUBSYSTEM=="backlight", RUN+="/bin/chgrp wheel /sys/class/backlight/%k/brightness"
 ACTION=="add", SUBSYSTEM=="backlight", RUN+="/bin/chmod g+w /sys/class/backlight/%k/brightness"
@@ -311,13 +267,10 @@ END
 
 
 echo "Setting kernel to hush"
-#mkdir -p /etc/sysctl.d/
-#touch /etc/sysctl.d/10-hush-kernel.conf
 echo "kernel.printk = 3 3 3 3" > /etc/sysctl.d/10-hush-kernel.conf
 
 
 echo "Installing systemd services"
-#mkdir -p /mnt/etc/systemd/system
 touch /etc/systemd/system/disable_gpe4E.service
 tee -a /etc/systemd/system/disable_gpe4E.service << END
 [Unit]
@@ -342,8 +295,8 @@ echo '%wheel ALL=(ALL) ALL' | EDITOR='tee -a' visudo
 EOF
 
 echo "Cleaning up"
-#umount -R /mnt
-#swapoff -a
+umount -R /mnt
+swapoff -a
 
 
-#echo "Sequence finished."
+echo "Sequence finished."
