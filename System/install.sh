@@ -40,22 +40,18 @@ pacman -Sy --noconfirm
 echo "Creating partitions"
 sgdisk --clear \
        --new=1:0:+550MiB --typecode=1:ef00    --change-name=1:EFI \
-       --new=2:0:+8GiB   --typecode=2:8200    --change-name=2:cryptswap \
-       --new=3:0:0       --typecode=3:8300    --change-name=3:cryptsystem \
+       #--new=2:0:+8GiB   --typecode=2:8200    --change-name=2:cryptswap \
+       --new=2:0:0       --typecode=2:8300    --change-name=2:encryptedSystemPartition \
        $TARGET_DISK
            
 echo "Setting up cryptographic volume"
 mkdir -p -m0700 /run/cryptsetup
-echo "$ENCRYPTION_PASSPHRASE" | cryptsetup -q -h sha512 -s 512 --use-random --type luks2 luksFormat /dev/disk/by-partlabel/cryptsystem
-echo "$ENCRYPTION_PASSPHRASE" | cryptsetup luksOpen /dev/disk/by-partlabel/cryptsystem system
+echo "$ENCRYPTION_PASSPHRASE" | cryptsetup -q -h sha512 -s 512 --use-random --type luks2 luksFormat /dev/disk/by-partlabel/encryptedSystemPartition
+echo "$ENCRYPTION_PASSPHRASE" | cryptsetup luksOpen /dev/disk/by-partlabel/encryptedSystemPartition systemPartition
 
 echo "Setting up EFI"
 mkfs.fat -F32 -n LINUXEFI /dev/disk/by-partlabel/EFI
 
-echo "Setting up swap"
-cryptsetup open --type plain --key-file /dev/urandom /dev/disk/by-partlabel/cryptswap swap
-mkswap -L swap /dev/mapper/swap
-swapon -L swap
 
 echo "Setting up BTRFS"
 # Setting mountflags
@@ -63,21 +59,22 @@ o="defaults,x-mount.mkdir"
 o_btrfs="${o},compress=lzo,ssd,noatime"
 
 # Temporarily mount system
-mkfs.btrfs -L system /dev/mapper/system
-mount -t btrfs LABEL=system /mnt
+mkfs.btrfs -L systemPartition /dev/mapper/systemPartition
+mount -t btrfs LABEL=systemPartition /mnt
 
 # Create subvolumns
 btrfs subvol create /mnt/root
 btrfs subvol create /mnt/home
+btrfs subvol create /mnt/swap
 btrfs subvol create /mnt/snapshots
 
 # Unmount
 umount -R /mnt
 
 # Mount subvolumes
-mount -t btrfs -o subvol=root,$o_btrfs LABEL=system /mnt
-mount -t btrfs -o subvol=home,$o_btrfs LABEL=system /mnt/home
-mount -t btrfs -o subvol=snapshots,$o_btrfs LABEL=system /mnt/.snapshots
+mount -t btrfs -o subvol=root,$o_btrfs LABEL=systemPartition /mnt
+mount -t btrfs -o subvol=home,$o_btrfs LABEL=systemPartition /mnt/home
+mount -t btrfs -o subvol=snapshots,$o_btrfs LABEL=systemPartition /mnt/.snapshots
 
 # Mount EFI
 mkdir /mnt/boot
@@ -92,13 +89,19 @@ yes '' | pacstrap /mnt $PACKAGES
 echo "Generating fstab"
 genfstab -L -p /mnt >> /mnt/etc/fstab
 
-# Fixes for swap
-sed -i 's:/dev/mapper/swap:/dev/mapper/cryptswap:g' /mnt/etc/fstab
 
-# Generating crypttab
-tee -a /mnt/etc/crypttab << END
-cryptswap        /dev/disk/by-partlabel/cryptswap        /dev/urandom        swap,offset=2048,cipher=aes-xts-plain64,size=256
-END
+  ## THROW AWAY SOON ##
+  #echo "Setting up swap"
+  #cryptsetup open --type plain --key-file /dev/urandom /dev/disk/by-partlabel/cryptswap swap
+  #mkswap -L swap /dev/mapper/swap
+  #swapon -L swap
+  # Fixes for swap
+  #sed -i 's:/dev/mapper/swap:/dev/mapper/cryptswap:g' /mnt/etc/fstab
+  # Generating crypttab
+  #tee -a /mnt/etc/crypttab << END
+  #cryptswap        /dev/disk/by-partlabel/cryptswap        /dev/urandom        swap,offset=2048,cipher=aes-xts-plain64,size=256
+  #END
+  ## END ##
 
 echo "Configuring new system"
 arch-chroot /mnt /bin/bash << EOF
@@ -182,6 +185,14 @@ default arch.conf
 timeout 0
 END
 
+
+
+
+
+
+
+
+
 mkdir -p /boot/loader/entries/
 touch /boot/loader/entries/arch.conf
 tee -a /boot/loader/entries/arch.conf << END
@@ -189,8 +200,18 @@ title Arch Linux
 linux /vmlinuz-linux
 initrd /$CPU_MICROCODE.img
 initrd /initramfs-linux.img
-options luks.name=$(blkid -s UUID -o value /dev/sda3)=cryptsystem root=UUID=$(blkid -s UUID -o value /dev/mapper/system)=system rootflags=subvol=root $KERNEL_OPTIONS
+options luks.name=$(blkid -s UUID -o value /dev/sda3)=encryptedSystemPartition root=UUID=$(blkid -s UUID -o value /dev/mapper/systemPartition) rootflags=subvol=root $KERNEL_OPTIONS
 END
+
+
+
+
+
+
+
+
+
+
 
 echo "Setting up Pacman hook for automatic systemd-boot updates"
 mkdir -p /etc/pacman.d/hooks/
@@ -206,6 +227,30 @@ When = PostTransaction
 Exec = /usr/bin/bootctl update
 END
 
+echo "Setting up swap"
+echo "Mounting swapfile subvolume"
+mkdir /swap
+mount -o noatime,subvol=@swap /dev/mapper/systemPartition /swap
+
+echo "Creating swapfile"
+truncate -s 0 /swap/swapfile
+chattr +C /swap/swapfile
+btrfs property set /swap/swapfile compression none
+fallocate -l "$swap_size"G /swap/swapfile
+
+echo "Setting correct permissions and formatting to swap"
+mkswap /swap/swapfile
+chmod 600 /swap/swapfile
+
+echo "Activating swapfile"
+swapon /swap/swapfile
+
+echo "Adding swap entry to fstab"
+tee -a /etc/fstab << END
+#/dev/mapper/systemPartition /swap btrfs rw,noatime,space_cachesubvol=@swap 0 0
+/swap/swapfile none swap defaults,discard 0 0
+END
+
 
 echo "Setting swappiness to 20"
 touch /etc/sysctl.d/99-swappiness.conf
@@ -217,28 +262,32 @@ systemctl enable fstrim.timer
 
 
 echo "Installing UDEV rules"
-touch 
-tee /mnt/etc/udev/rules.d/40-disable_wakeup_from_xhc1.rules << END
+touch /mnt/etc/udev/rules.d/40-disable_wakeup_from_xhc1.rules
+tee -a /mnt/etc/udev/rules.d/40-disable_wakeup_from_xhc1.rules << END
 SUBSYSTEM=="pci", KERNEL=="0000:00:14.0", ATTR{power/wakeup}="disabled"
 END
 
-tee /mnt/etc/udev/rules.d/50-allow_user_to_change_backlight.rules << END
+touch /mnt/etc/udev/rules.d/50-allow_user_to_change_backlight.rules 
+tee -a /mnt/etc/udev/rules.d/50-allow_user_to_change_backlight.rules << END
 ACTION=="add", SUBSYSTEM=="backlight", RUN+="/bin/chgrp wheel /sys/class/backlight/%k/brightness"
 ACTION=="add", SUBSYSTEM=="backlight", RUN+="/bin/chmod g+w /sys/class/backlight/%k/brightness"
 END
 
-tee /mnt/etc/udev/rules.d/51-allow_user_to_change_kbd_led.rules << END
+touch /mnt/etc/udev/rules.d/51-allow_user_to_change_kbd_led.rules 
+tee -a /mnt/etc/udev/rules.d/51-allow_user_to_change_kbd_led.rules << END
 ACTION=="add", KERNEL=="smc::kbd_backlight", SUBSYSTEM=="leds", RUN+="/bin/chgrp wheel /sys/class/leds/smc::kbd_backlight/brightness"
 ACTION=="add", KERNEL=="smc::kbd_backlight", SUBSYSTEM=="leds", RUN+="/bin/chmod g+w /sys/class/leds/smc::kbd_backlight/brightness"
 END
 
 
 echo "Setting kernel to hush"
+touch /mnt/etc/sysctl.d/10-hush-kernel.conf
 echo "kernel.printk = 3 3 3 3" > /mnt/etc/sysctl.d/10-hush-kernel.conf
 
 
 echo "Installing systemd services"
-tee /mnt/etc/systemd/system/disable_gpe4E.service << END
+touch /mnt/etc/systemd/system/disable_gpe4E.service
+tee -a /mnt/etc/systemd/system/disable_gpe4E.service << END
 [Unit]
 Description=the service that disables GPE 4E, an interrupt that is going crazy on Macs
 
