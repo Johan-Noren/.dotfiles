@@ -90,6 +90,11 @@ yes '' | pacstrap /mnt $PACKAGES
 echo "Generating fstab"
 genfstab /mnt >> /mnt/etc/fstab
 
+# Fixes for swap
+sed -i 's:/dev/mapper/swap:/dev/mapper/cryptswap:g' /mnt/etc/fstab
+tee -a /mnt/etc/crypttab << END
+cryptswap        /dev/disk/by-partlabel/cryptswap        /dev/urandom        swap,offset=2048,cipher=aes-xts-plain64,size=256
+END
 
 echo "Configuring new system"
 arch-chroot /mnt /bin/bash << EOF
