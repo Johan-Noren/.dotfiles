@@ -36,8 +36,18 @@ INITRAMFS_MODULES="intel_agp i915 btrfs"
 INITRAMFS_BINARIES="btrfs"
 INITRAMFS_HOOKS="base systemd block autodetect modconf keyboard sd-vconsole sd-encrypt filesystems"
 
+# Graphic stuff
+GPU_DRIVERS="vulkan-intel intel-media-driver "
+LIBVA_ENVIRONMENT_VARIABLE="export LIBVA_DRIVER_NAME=iHD"
+
+
 # Sets packages to be installed
-PACKAGES="base base-devel linux linux-headers linux-firmware efibootmgr btrfs-progs e2fsprogs device-mapper $CPU_MICROCODE iwd zsh cryptsetup networkmanager wget man-db man-pages neovim diffutils flatpak"
+PACKAGES="base base-devel linux linux-headers linux-firmware efibootmgr btrfs-progs e2fsprogs device-mapper $CPU_MICROCODE $GPU_DRIVERS ffmpeg pipewire libpipewire02 libva-utils iwd zsh ufw cryptsetup openssh upower thermald unzip unrar powertop ttf-dejavu xdg-user-dirs wget git man-db man-pages neovim firefox diffutils"
+AUR_PACKAGES="powertop mbpfan-git "
+
+
+
+
 
 
 echo "Updating system clock"
@@ -106,7 +116,9 @@ arch-chroot /mnt /bin/bash << EOF
 echo "Setting system clock"
 timedatectl set-ntp true
 timedatectl set-timezone $CONTINENT_CITY
+ln -sf /usr/share/zoneinfo/${CONTINENT_CITY} /etc/localtime
 hwclock --systohc --localtime
+
 
 
 echo "Setting locales"
@@ -281,11 +293,6 @@ END
 
 systemctl enable disable_gpe4E
 
-
-echo "Enabling NetworkManager"
-systemctl enable NetworkManager
-
-
 echo "Adding user as a sudoer"
 echo '%wheel ALL=(ALL) ALL' | EDITOR='tee -a' visudo
 
@@ -302,6 +309,57 @@ setterm -cursor on >> /etc/issue
 
 # Enable
 systemctl enable iwd
+
+echo "Installing yay"
+cd /tmp
+git clone https://aur.archlinux.org/yay-bin.git
+cd yay-bin
+makepkg -si --noconfirm
+
+echo "Installing some additionall packages from AUR"
+yay -S --noconfirm $
+
+
+echo "Improving laptop battery"
+echo "Enabling audio power saving features"
+sudo touch /etc/modprobe.d/audio_powersave.conf
+sudo tee -a /etc/modprobe.d/audio_powersave.conf << END
+options snd_hda_intel power_save=1
+END
+
+echo "Enabling wifi (iwlwifi) power saving features"
+sudo touch /etc/modprobe.d/iwlwifi.conf
+sudo tee -a /etc/modprobe.d/iwlwifi.conf << END
+options iwlwifi power_save=1 
+END
+
+echo "Reducing VM writeback time"
+sudo touch /etc/sysctl.d/dirty.conf
+sudo tee -a /etc/sysctl.d/dirty.conf << END
+vm.dirty_writeback_centisecs = 1500
+END
+
+echo "Setting environment variables (and improve Java applications font rendering)"
+sudo tee -a /etc/environment << END
+$LIBVA_ENVIRONMENT_VARIABLE
+export _JAVA_OPTIONS='-Dawt.useSystemAAFontSettings=gasp'
+export JAVA_FONTS=/usr/share/fonts/TTF
+END
+
+echo "Installing and configuring UFW"
+sudo systemctl enable ufw
+sudo systemctl start ufw
+sudo ufw enable
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+echo "Enabling thermald"
+sudo systemctl start thermald.service
+sudo systemctl enable thermald.service
+
+echo "Enabling bluetooth"
+sudo systemctl start bluetooth.service
+sudo systemctl enable bluetooth.service
 
 EOF
 echo "Cleaning up"
