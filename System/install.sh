@@ -9,12 +9,23 @@
 ## VARIABLES ##
 ENCRYPTION_PASSPHRASE="temp"
 ROOT_PASSWORD="lemp"
-USER_PASSWORD="pemp"
-HOSTNAME="hosty"
+
 USERNAME="testu"
+USER_PASSWORD="pemp"
+
+# Misc settings
+HOSTNAME="hosty"
 CONTINENT_CITY="Europe/Stockholm"
 
+# Install system to
 TARGET_DISK="/dev/sda"
+
+# Size of swapfile
+SWAP_SIZE="12"
+
+# Setting mountflags
+MOUNT_OPTIONS="defaults,x-mount.mkdir"
+MOUNT_OPTIONS_BTRFS="${MOUNT_OPTIONS},compress=lzo,ssd,noatime"
 
 # Kernel options
 CPU_MICROCODE="intel-ucode"
@@ -28,12 +39,6 @@ INITRAMFS_HOOKS="base systemd block autodetect modconf keyboard sd-vconsole sd-e
 # Sets packages to be installed
 PACKAGES="base base-devel linux linux-headers linux-firmware efibootmgr btrfs-progs e2fsprogs device-mapper $CPU_MICROCODE zsh cryptsetup networkmanager wget man-db man-pages neovim diffutils flatpak"
 
-# Setting mountflags
-MOUNT_OPTIONS="defaults,x-mount.mkdir"
-MOUNT_OPTIONS_BTRFS="${MOUNT_OPTIONS},compress=lzo,ssd,noatime"
-
-# Swap size
-SWAP_SIZE="16"
 
 echo "Updating system clock"
 timedatectl set-ntp true
@@ -93,19 +98,8 @@ genfstab -L -p /mnt >> /mnt/etc/fstab
 # Add swap-partition
 echo "LABEL=systemPartition /swap  btrfs  rw,noatime,ssd,space_cache,subvol=/swap,subvol=swap     0 0" >> /mnt/etc/fstab
 
-  ## THROW AWAY SOON ##
-  #echo "Setting up swap"
-  #cryptsetup open --type plain --key-file /dev/urandom /dev/disk/by-partlabel/cryptswap swap
-  #mkswap -L swap /dev/mapper/swap
-  #swapon -L swap
-  # Fixes for swap
-  #sed -i 's:/dev/mapper/swap:/dev/mapper/cryptswap:g' /mnt/etc/fstab
-  # Generating crypttab
-  #tee -a /mnt/etc/crypttab << END
-  #cryptswap        /dev/disk/by-partlabel/cryptswap        /dev/urandom        swap,offset=2048,cipher=aes-xts-plain64,size=256
-  #END
-  ## END ##
 
+## CHROOTING TOOTHING PART ##
 echo "Configuring new system"
 arch-chroot /mnt /bin/bash << EOF
 
@@ -197,6 +191,8 @@ initrd /$CPU_MICROCODE.img
 initrd /initramfs-linux.img
 options luks.name=$(blkid -s UUID -o value /dev/sda2)=systemPartition root=UUID=$(blkid -s UUID -o value /dev/mapper/systemPartition) rootflags=subvol=root $KERNEL_OPTIONS
 END
+
+# TODO: HIBERNATION SUPPORT WOULD BE NICE IN THE FUTURE. 
 
 
 echo "Setting up Pacman hook for automatic systemd-boot updates"
@@ -293,6 +289,18 @@ systemctl enable NetworkManager
 echo "Adding user as a sudoer"
 echo '%wheel ALL=(ALL) ALL' | EDITOR='tee -a' visudo
 EOF
+
+# Make sure that screen is not cleared before login
+mkdir -p /etc/systemd/system/getty@tty1.service.d/
+touch /etc/systemd/system/getty@tty1.service.d/50-prevent_clearscreen_before_console.conf
+tee -a /etc/systemd/system/getty@tty1.service.d/50-prevent_clearscreen_before_console.conf << END
+[Service]
+TTYVTDisallocate=no
+END
+
+# Cursor on
+setterm -cursor on >> /etc/issue
+
 
 echo "Cleaning up"
 umount -R /mnt
