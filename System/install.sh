@@ -2,8 +2,8 @@
 
 #TODO:
 # [x] .zshrc isn't copied
-# [ ] .hushlogin must be added
-# [ ] bluetooth service failing
+# [x] .hushlogin must be added
+# [x] bluetooth service failing
 # [ ] yay not compiling (also not mbpfan-git)
 # 
 
@@ -312,14 +312,14 @@ setterm -cursor on >> /etc/issue
 # Enable
 systemctl enable iwd
 
-echo "Installing yay"
-cd /tmp
-git clone https://aur.archlinux.org/yay-bin.git
-cd yay-bin
-makepkg -si --noconfirm
+#echo "Installing yay"
+#cd /tmp
+#git clone https://aur.archlinux.org/yay-bin.git
+#cd yay-bin
+#makepkg -si --noconfirm
 
-echo "Installing some additionall packages from AUR"
-yay -S --noconfirm $
+#echo "Installing some additionall packages from AUR"
+#yay -S --noconfirm $
 
 
 
@@ -367,6 +367,18 @@ systemctl enable thermald.service
 echo "Enabling bluetooth"
 systemctl enable bluetooth.service
 
+echo "Configuring network"
+touch /etc/iwd/main.conf
+tee -a /etc/iwd/main.conf << END
+[General]
+EnableNetworkConfiguration=true
+
+[Network]
+NameResolvingService=systemd
+END
+
+echo "Enabling systemd-resolved"
+systemctl enable systemd-resolved.service
 
 #echo "Enabling mbpfan"
 #systemctl enable mbpfan.service
