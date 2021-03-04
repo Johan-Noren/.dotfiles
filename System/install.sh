@@ -1,5 +1,12 @@
 #!/bin/bash
 
+#TODO:
+# .zshrc isn't copied
+# .hushlogin must be added
+# bluetooth service failing
+# yay not compiling (also not mbpfan-git)
+# 
+
 # before
 # loadkeys sv-latin1
 # iwctl station wlan0 scan
