@@ -1,10 +1,10 @@
 #!/bin/bash
 
 #TODO:
-# .zshrc isn't copied
-# .hushlogin must be added
-# bluetooth service failing
-# yay not compiling (also not mbpfan-git)
+# [x] .zshrc isn't copied
+# [ ] .hushlogin must be added
+# [ ] bluetooth service failing
+# [ ] yay not compiling (also not mbpfan-git)
 # 
 
 # before
@@ -49,7 +49,7 @@ LIBVA_ENVIRONMENT_VARIABLE="export LIBVA_DRIVER_NAME=iHD"
 
 
 # Sets packages to be installed
-PACKAGES="base base-devel linux linux-headers linux-firmware efibootmgr btrfs-progs e2fsprogs device-mapper $CPU_MICROCODE $GPU_DRIVERS ffmpeg pipewire libpipewire02 libva-utils iwd zsh ufw cryptsetup openssh upower thermald unzip unrar powertop ttf-dejavu xdg-user-dirs wget git man-db man-pages neovim firefox diffutils"
+PACKAGES="base base-devel linux linux-headers linux-firmware efibootmgr btrfs-progs e2fsprogs device-mapper $CPU_MICROCODE $GPU_DRIVERS ffmpeg bluez pipewire libpipewire02 libva-utils iwd zsh ufw cryptsetup openssh upower thermald unzip unrar powertop ttf-dejavu xdg-user-dirs wget git man-db man-pages neovim firefox diffutils"
 AUR_PACKAGES="mbpfan-git "
 
 
@@ -178,11 +178,6 @@ echo $HOSTNAME > /etc/hostname
 
 echo "Setting root password"
 echo -en "$ROOT_PASSWORD\n$ROOT_PASSWORD" | passwd
-
-
-echo "Creating new user"
-useradd -m -G wheel,video -s /bin/bash $USERNAME
-echo -en "$USER_PASSWORD\n$USER_PASSWORD" | passwd $USERNAME
 
 
 echo "Generating initramfs"
@@ -373,9 +368,12 @@ echo "Enabling bluetooth"
 systemctl enable bluetooth.service
 
 
-echo "Enabling mbpfan"
-systemctl enable mbpfan.service
+#echo "Enabling mbpfan"
+#systemctl enable mbpfan.service
 
+
+# Meningless stuff. 
+touch /etc/skel/.hushlogin
 
 echo "Setting terminal defaults"
 touch /etc/skel/.zshrc
@@ -410,7 +408,10 @@ export PATH=$PATH:~/.local/bin
 END
 
 
-# SETTING DEFAULT SHELL TO ZSH
+
+echo "Creating new user"
+useradd -m -G wheel,video -s /bin/bash $USERNAME
+echo -en "$USER_PASSWORD\n$USER_PASSWORD" | passwd $USERNAME
 chsh -s /bin/zsh $USERNAME
 
 
