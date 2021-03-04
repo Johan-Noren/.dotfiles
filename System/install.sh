@@ -121,11 +121,10 @@ echo "Configuring new system"
 arch-chroot /mnt /bin/bash << EOF
 
 echo "Setting system clock"
-timedatectl set-ntp true
 timedatectl set-timezone $CONTINENT_CITY
 ln -sf /usr/share/zoneinfo/${CONTINENT_CITY} /etc/localtime
-hwclock --systohc --localtime
-
+timedatectl set-ntp true
+#hwclock --systohc --localtime REMOVE
 
 
 echo "Setting locales"
