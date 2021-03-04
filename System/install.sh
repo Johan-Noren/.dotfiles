@@ -351,23 +351,23 @@ END
 
 
 echo "Installing and configuring UFW"
-sudo systemctl enable ufw
-sudo systemctl start ufw
-sudo ufw enable
-sudo ufw default deny incoming
-sudo ufw default allow outgoing
+systemctl enable ufw
+systemctl start ufw
+ufw enable
+ufw default deny incoming
+ufw default allow outgoing
 
 
 echo "Enabling thermald"
-sudo systemctl enable thermald.service
+systemctl enable thermald.service
 
 
 echo "Enabling bluetooth"
-sudo systemctl enable bluetooth.service
+systemctl enable bluetooth.service
 
 
 echo "Enabling mbpfan"
-sudo systemctl enable mbpfan.service
+systemctl enable mbpfan.service
 
 
 echo "Setting terminal defaults"
