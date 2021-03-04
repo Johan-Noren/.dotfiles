@@ -43,7 +43,7 @@ LIBVA_ENVIRONMENT_VARIABLE="export LIBVA_DRIVER_NAME=iHD"
 
 # Sets packages to be installed
 PACKAGES="base base-devel linux linux-headers linux-firmware efibootmgr btrfs-progs e2fsprogs device-mapper $CPU_MICROCODE $GPU_DRIVERS ffmpeg pipewire libpipewire02 libva-utils iwd zsh ufw cryptsetup openssh upower thermald unzip unrar powertop ttf-dejavu xdg-user-dirs wget git man-db man-pages neovim firefox diffutils"
-AUR_PACKAGES="powertop mbpfan-git "
+AUR_PACKAGES="mbpfan-git "
 
 
 
@@ -320,31 +320,35 @@ echo "Installing some additionall packages from AUR"
 yay -S --noconfirm $
 
 
-echo "Improving laptop battery"
+
 echo "Enabling audio power saving features"
-sudo touch /etc/modprobe.d/audio_powersave.conf
-sudo tee -a /etc/modprobe.d/audio_powersave.conf << END
+touch /etc/modprobe.d/audio_powersave.conf
+tee -a /etc/modprobe.d/audio_powersave.conf << END
 options snd_hda_intel power_save=1
 END
 
+
 echo "Enabling wifi (iwlwifi) power saving features"
-sudo touch /etc/modprobe.d/iwlwifi.conf
-sudo tee -a /etc/modprobe.d/iwlwifi.conf << END
+touch /etc/modprobe.d/iwlwifi.conf
+tee -a /etc/modprobe.d/iwlwifi.conf << END
 options iwlwifi power_save=1 
 END
 
+
 echo "Reducing VM writeback time"
-sudo touch /etc/sysctl.d/dirty.conf
-sudo tee -a /etc/sysctl.d/dirty.conf << END
+touch /etc/sysctl.d/dirty.conf
+tee -a /etc/sysctl.d/dirty.conf << END
 vm.dirty_writeback_centisecs = 1500
 END
 
+
 echo "Setting environment variables (and improve Java applications font rendering)"
-sudo tee -a /etc/environment << END
+tee -a /etc/environment << END
 $LIBVA_ENVIRONMENT_VARIABLE
 export _JAVA_OPTIONS='-Dawt.useSystemAAFontSettings=gasp'
 export JAVA_FONTS=/usr/share/fonts/TTF
 END
+
 
 echo "Installing and configuring UFW"
 sudo systemctl enable ufw
@@ -353,14 +357,57 @@ sudo ufw enable
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
 
+
 echo "Enabling thermald"
-sudo systemctl start thermald.service
 sudo systemctl enable thermald.service
 
+
 echo "Enabling bluetooth"
-sudo systemctl start bluetooth.service
 sudo systemctl enable bluetooth.service
 
+
+echo "Enabling mbpfan"
+sudo systemctl enable mbpfan.service
+
+
+echo "Setting terminal defaults"
+touch /etc/skel/.zshrc
+tee -a /etc/skel/.zshrc << END
+HISTFILE=~/.histfile
+HISTSIZE=1000
+SAVEHIST=1000
+
+bindkey -e
+zstyle ':completion:*' use-ip true
+setopt NO_CASE_GLOB
+autoload -Uz compinit
+compinit
+
+# ALIASES
+alias vi='nvim '
+alias sudo='sudo '
+alias ls='ls --color=auto'
+
+# PROMPT
+export PS1='
+%B%F{white}%d%f%b '
+
+export GDK_BACKEND=wayland
+export MOZ_ENABLE_WAYLAND=1
+export MOZ_USE_XINPUT2=1
+export QT_QPA_PLATFORM=wayland-egl
+export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+export EDITOR=/bin/nvim
+export BROWSER=/bin/firefox
+export PATH=$PATH:~/.local/bin
+END
+
+
+# SETTING DEFAULT SHELL TO ZSH
+chsh -s /bin/zsh $USERNAME
+
+
+## INLINE BOOTSTRAP SCRIPT ENDS HERE ##
 EOF
 echo "Cleaning up"
 umount -R /mnt
