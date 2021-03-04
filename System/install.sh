@@ -288,7 +288,6 @@ systemctl enable NetworkManager
 
 echo "Adding user as a sudoer"
 echo '%wheel ALL=(ALL) ALL' | EDITOR='tee -a' visudo
-EOF
 
 # Make sure that screen is not cleared before login
 mkdir -p /etc/systemd/system/getty@tty1.service.d/
@@ -301,7 +300,10 @@ END
 # Cursor on
 setterm -cursor on >> /etc/issue
 
+# Enable
+systemctl enable iwd
 
+EOF
 echo "Cleaning up"
 umount -R /mnt
 swapoff -a
