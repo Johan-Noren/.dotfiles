@@ -37,7 +37,7 @@ INITRAMFS_BINARIES="btrfs"
 INITRAMFS_HOOKS="base systemd block autodetect modconf keyboard sd-vconsole sd-encrypt filesystems"
 
 # Sets packages to be installed
-PACKAGES="base base-devel linux linux-headers linux-firmware efibootmgr btrfs-progs e2fsprogs device-mapper $CPU_MICROCODE zsh cryptsetup networkmanager wget man-db man-pages neovim diffutils flatpak"
+PACKAGES="base base-devel linux linux-headers linux-firmware efibootmgr btrfs-progs e2fsprogs device-mapper $CPU_MICROCODE iwd zsh cryptsetup networkmanager wget man-db man-pages neovim diffutils flatpak"
 
 
 echo "Updating system clock"
