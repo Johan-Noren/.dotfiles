@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/bash 
+
+set -x 
 
 #TODO:
 # [x] .zshrc isn't copied
