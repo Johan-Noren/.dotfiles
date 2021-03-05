@@ -6,7 +6,7 @@ ORANGE='\033[0;33m'
 NC='\033[0m' # No Color
 
 output() {
-       echo "${ORANGE} >>>   $1   <<<${NC}"
+       echo -e "${ORANGE} >>>   $1   <<<${NC}"
        }
 
 #TODO:
