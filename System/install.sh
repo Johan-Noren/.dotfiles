@@ -440,6 +440,12 @@ chsh -s /bin/zsh $USERNAME
 
 ## INLINE BOOTSTRAP SCRIPT ENDS HERE ##
 EOF
+
+# Copy install_log to root so that it is keept
+output "Preserving install_log"
+cp install_log /mnt/root
+
+
 output "Cleaning up"
 umount -R /mnt
 swapoff -a
