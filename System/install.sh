@@ -5,7 +5,7 @@
 # [x] .hushlogin must be added
 # [x] bluetooth service failing
 # [ ] yay not compiling (also not mbpfan-git)
-# 
+# [x] wireless issues. -> iwd.conf and systemd-resolved 
 
 # before
 # loadkeys sv-latin1
