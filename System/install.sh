@@ -1,6 +1,13 @@
 #!/bin/bash 
 
-set -x 
+set -x
+
+ORANGE='\033[0;33m'
+NC='\033[0m' # No Color
+
+output() {
+       echo "${ORANGE} >>>   $1   <<<${NC}"
+       }
 
 #TODO:
 # [x] .zshrc isn't copied
@@ -61,30 +68,30 @@ AUR_PACKAGES="mbpfan-git "
 
 
 
-echo "Updating system clock"
+output "Updating system clock"
 timedatectl set-ntp true
 
-echo "Syncing packages database"
+output "Syncing packages database"
 pacman -Sy --noconfirm
 
 
 ## SETTING UP DISKS ##
-echo "Creating partitions"
+output "Creating partitions"
 sgdisk --clear \
        --new=1:0:+550MiB --typecode=1:ef00    --change-name=1:EFI \
        --new=2:0:0       --typecode=2:8300    --change-name=2:encryptedSystemPartition \
        $TARGET_DISK
            
-echo "Setting up cryptographic volume"
+output "Setting up cryptographic volume"
 mkdir -p -m0700 /run/cryptsetup
 echo "$ENCRYPTION_PASSPHRASE" | cryptsetup -q -h sha512 -s 512 --use-random --type luks2 luksFormat /dev/disk/by-partlabel/encryptedSystemPartition
 echo "$ENCRYPTION_PASSPHRASE" | cryptsetup luksOpen /dev/disk/by-partlabel/encryptedSystemPartition systemPartition
 
-echo "Setting up EFI"
+output "Setting up EFI"
 mkfs.fat -F32 -n LINUXEFI /dev/disk/by-partlabel/EFI
 
 
-echo "Setting up BTRFS"
+output "Setting up BTRFS"
 # Temporarily mount system
 mkfs.btrfs -L systemPartition /dev/mapper/systemPartition
 mount -t btrfs LABEL=systemPartition /mnt
@@ -108,12 +115,12 @@ mkdir /mnt/boot
 mount /dev/disk/by-partlabel/EFI /mnt/boot
 
 ## INSTALLING PACKAGES ##
-echo "Installing Arch Linux"
+output "Installing Arch Linux"
 yes '' | pacstrap /mnt $PACKAGES 
 
 
 ## GENERATING FSTAB AND CRYPTTAB ##
-echo "Generating fstab"
+output "Generating fstab"
 genfstab -L -p /mnt >> /mnt/etc/fstab
 
 # Add swap-partition
@@ -121,17 +128,17 @@ echo "LABEL=systemPartition /swap  btrfs  rw,noatime,ssd,space_cache,subvol=/swa
 
 
 ## CHROOTING TOOTHING PART ##
-echo "Configuring new system"
+output "Configuring new system"
 arch-chroot /mnt /bin/bash << EOF
 
-echo "Setting system clock"
+output "Setting system clock"
 timedatectl set-timezone $CONTINENT_CITY
 ln -sf /usr/share/zoneinfo/${CONTINENT_CITY} /etc/localtime
 timedatectl set-ntp true
 #hwclock --systohc --localtime REMOVE
 
 
-echo "Setting locales"
+output "Setting locales"
 echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 echo "sv_SE.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
@@ -153,7 +160,7 @@ LC_IDENTIFICATION="sv_SE.UTF-8"
 LC_ALL=
 END
 
-echo "Configuring console"
+output "Configuring console"
 tee -a /etc/vconsole.conf << END
 KEYMAP=sv-latin1
 #FONT=ter-v32n
@@ -175,15 +182,15 @@ COLOR_14=8fbcbb
 COLOR_15=eceff4
 END
 
-echo "Setting hostname"
+output "Setting hostname"
 echo $HOSTNAME > /etc/hostname
 
 
-echo "Setting root password"
+output "Setting root password"
 echo -en "$ROOT_PASSWORD\n$ROOT_PASSWORD" | passwd
 
 
-echo "Generating initramfs"
+output "Generating initramfs"
 sed -i 's/^HOOKS.*/HOOKS=($INITRAMFS_HOOKS)/' /etc/mkinitcpio.conf
 sed -i 's/^MODULES.*/MODULES=($INITRAMFS_MODULES)/' /etc/mkinitcpio.conf
 sed -i 's/^BINARIES.*/BINARIES=($INITRAMFS_BINARIES)/' /etc/mkinitcpio.conf
@@ -191,7 +198,7 @@ sed -i 's/#COMPRESSION="lz4"/COMPRESSION="lz4"/g' /etc/mkinitcpio.conf
 mkinitcpio -P
 
 
-echo "Setting up systemd-boot"
+output "Setting up systemd-boot"
 bootctl --path=/boot install
 mkdir -p /boot/loader/
 tee -a /boot/loader/loader.conf << END
@@ -212,7 +219,7 @@ END
 # TODO: HIBERNATION SUPPORT WOULD BE NICE IN THE FUTURE. 
 
 
-echo "Setting up Pacman hook for automatic systemd-boot updates"
+output "Setting up Pacman hook for automatic systemd-boot updates"
 mkdir -p /etc/pacman.d/hooks/
 touch /etc/pacman.d/hooks/systemd-boot.hook
 tee -a /etc/pacman.d/hooks/systemd-boot.hook << END
@@ -227,37 +234,37 @@ Exec = /usr/bin/bootctl update
 END
 
 
-echo "Setting up swap"
+output "Setting up swap"
 echo "Mounting swapfile subvolume"
 mkdir /swap
 mount -o noatime,subvol=swap /dev/mapper/systemPartition /swap
 
-echo "Creating swapfile"
+output "Creating swapfile"
 truncate -s 0 /swap/swapfile
 chattr +C /swap/swapfile
 btrfs property set /swap/swapfile compression none
 fallocate -l "$SWAP_SIZE"G /swap/swapfile
 
-echo "Setting correct permissions and formatting to swap"
+output "Setting correct permissions and formatting to swap"
 mkswap /swap/swapfile
 chmod 600 /swap/swapfile
 
-echo "Activating swapfile"
+output "Activating swapfile"
 swapon /swap/swapfile
 
-echo "Adding swap entry to fstab"
+output "Adding swap entry to fstab"
 tee -a /etc/fstab << END
 #/dev/mapper/systemPartition /swap btrfs rw,noatime,space_cachesubvol=@swap 0 0
 /swap/swapfile none swap defaults,discard 0 0
 END
 
 
-echo "Setting swappiness to 20"
+output "Setting swappiness to 20"
 touch /etc/sysctl.d/99-swappiness.conf
 echo 'vm.swappiness=20' > /etc/sysctl.d/99-swappiness.conf
 
 
-echo "Enabling periodic TRIM"
+output "Enabling periodic TRIM"
 systemctl enable fstrim.timer
 
 
@@ -279,11 +286,11 @@ ACTION=="add", KERNEL=="smc::kbd_backlight", SUBSYSTEM=="leds", RUN+="/bin/chmod
 END
 
 
-echo "Setting kernel to hush"
+output "Setting kernel to hush"
 echo "kernel.printk = 3 3 3 3" > /etc/sysctl.d/10-hush-kernel.conf
 
 
-echo "Installing systemd services"
+output "Installing systemd services"
 touch /etc/systemd/system/disable_gpe4E.service
 tee -a /etc/systemd/system/disable_gpe4E.service << END
 [Unit]
@@ -298,7 +305,7 @@ END
 
 systemctl enable disable_gpe4E
 
-echo "Adding user as a sudoer"
+output "Adding user as a sudoer"
 echo '%wheel ALL=(ALL) ALL' | EDITOR='tee -a' visudo
 
 # Make sure that screen is not cleared before login
@@ -315,39 +322,39 @@ setterm -cursor on >> /etc/issue
 # Enable
 systemctl enable iwd
 
-#echo "Installing yay"
+#output "Installing yay"
 #cd /tmp
 #git clone https://aur.archlinux.org/yay-bin.git
 #cd yay-bin
 #makepkg -si --noconfirm
 
-#echo "Installing some additionall packages from AUR"
+#output "Installing some additionall packages from AUR"
 #yay -S --noconfirm $
 
 
 
-echo "Enabling audio power saving features"
+output "Enabling audio power saving features"
 touch /etc/modprobe.d/audio_powersave.conf
 tee -a /etc/modprobe.d/audio_powersave.conf << END
 options snd_hda_intel power_save=1
 END
 
 
-echo "Enabling wifi (iwlwifi) power saving features"
+output "Enabling wifi (iwlwifi) power saving features"
 touch /etc/modprobe.d/iwlwifi.conf
 tee -a /etc/modprobe.d/iwlwifi.conf << END
 options iwlwifi power_save=1 
 END
 
 
-echo "Reducing VM writeback time"
+output "Reducing VM writeback time"
 touch /etc/sysctl.d/dirty.conf
 tee -a /etc/sysctl.d/dirty.conf << END
 vm.dirty_writeback_centisecs = 1500
 END
 
 
-echo "Setting environment variables (and improve Java applications font rendering)"
+output "Setting environment variables (and improve Java applications font rendering)"
 tee -a /etc/environment << END
 $LIBVA_ENVIRONMENT_VARIABLE
 export _JAVA_OPTIONS='-Dawt.useSystemAAFontSettings=gasp'
@@ -355,7 +362,7 @@ export JAVA_FONTS=/usr/share/fonts/TTF
 END
 
 
-echo "Installing and configuring UFW"
+output "Installing and configuring UFW"
 systemctl enable ufw
 systemctl start ufw
 ufw enable
@@ -363,14 +370,14 @@ ufw default deny incoming
 ufw default allow outgoing
 
 
-echo "Enabling thermald"
+output "Enabling thermald"
 systemctl enable thermald.service
 
 
-echo "Enabling bluetooth"
+output "Enabling bluetooth"
 systemctl enable bluetooth.service
 
-echo "Configuring network"
+output "Configuring network"
 mkdir -p /etc/iwd
 touch /etc/iwd/main.conf
 tee -a /etc/iwd/main.conf << END
@@ -381,17 +388,17 @@ EnableNetworkConfiguration=true
 NameResolvingService=systemd
 END
 
-echo "Enabling systemd-resolved"
+output "Enabling systemd-resolved"
 systemctl enable systemd-resolved.service
 
-#echo "Enabling mbpfan"
+#output "Enabling mbpfan"
 #systemctl enable mbpfan.service
 
 
 # Meningless stuff. 
 touch /etc/skel/.hushlogin
 
-echo "Setting terminal defaults"
+output "Setting terminal defaults"
 touch /etc/skel/.zshrc
 tee -a /etc/skel/.zshrc << END
 HISTFILE=~/.histfile
@@ -425,7 +432,7 @@ END
 
 
 
-echo "Creating new user"
+output "Creating new user"
 useradd -m -G wheel,video -s /bin/bash $USERNAME
 echo -en "$USER_PASSWORD\n$USER_PASSWORD" | passwd $USERNAME
 chsh -s /bin/zsh $USERNAME
@@ -433,9 +440,9 @@ chsh -s /bin/zsh $USERNAME
 
 ## INLINE BOOTSTRAP SCRIPT ENDS HERE ##
 EOF
-echo "Cleaning up"
+output "Cleaning up"
 umount -R /mnt
 swapoff -a
 
 
-echo "Sequence finished."
+output "Sequence finished."
