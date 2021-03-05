@@ -15,7 +15,7 @@ output() {
 # [x] bluetooth service failing
 # [ ] yay not compiling (also not mbpfan-git)
 # [x] wireless issues. -> iwd.conf and systemd-resolved 
-# [ ] timedatectl set-ntp true isnt stored
+# [x] timedatectl set-ntp true isnt stored
 
 # before
 # loadkeys sv-latin1
@@ -390,6 +390,9 @@ END
 
 output "Enabling systemd-resolved"
 systemctl enable systemd-resolved.service
+
+output "Enabling NTP"
+systemctl enable systemd-timesyncd.service
 
 #output "Enabling mbpfan"
 #systemctl enable mbpfan.service
