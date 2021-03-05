@@ -6,6 +6,7 @@
 # [x] bluetooth service failing
 # [ ] yay not compiling (also not mbpfan-git)
 # [x] wireless issues. -> iwd.conf and systemd-resolved 
+# [ ] timedatectl set-ntp true isnt stored
 
 # before
 # loadkeys sv-latin1
