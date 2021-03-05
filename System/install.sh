@@ -368,6 +368,7 @@ echo "Enabling bluetooth"
 systemctl enable bluetooth.service
 
 echo "Configuring network"
+mkdir -p /etc/iwd
 touch /etc/iwd/main.conf
 tee -a /etc/iwd/main.conf << END
 [General]
