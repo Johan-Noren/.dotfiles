@@ -16,6 +16,7 @@ output() {
 # [ ] yay not compiling (also not mbpfan-git)
 # [x] wireless issues. -> iwd.conf and systemd-resolved 
 # [x] timedatectl set-ntp true isnt stored
+# [x] made zsh default
 
 # before
 # loadkeys sv-latin1
@@ -59,14 +60,9 @@ LIBVA_ENVIRONMENT_VARIABLE="export LIBVA_DRIVER_NAME=iHD"
 
 
 # Sets packages to be installed
-SWAYWM="sway swaybg swayidle swaylock mako bemenu-wlroots alacritty udisks2 udiskie light mpv imv grim slurp wl-clipboard wf-recorder"
+SWAYWM="sway swaybg swayidle swaylock mako bemenu-wlroots alacritty udisks2 udiskie light mpv imv grim slurp wl-clipboard wf-recorder i3status-rust"
 PACKAGES="base base-devel linux linux-headers linux-firmware efibootmgr btrfs-progs e2fsprogs device-mapper $CPU_MICROCODE $GPU_DRIVERS $SWAYWM ffmpeg bluez pipewire libpipewire02 libva-utils iwd zsh ufw cryptsetup openssh upower thermald unzip unrar powertop ttf-dejavu xdg-user-dirs wget git man-db man-pages neovim firefox diffutils"
 AUR_PACKAGES="mbpfan-git "
-
-
-
-
-
 
 output "Updating system clock"
 timedatectl set-ntp true
@@ -397,6 +393,8 @@ systemctl enable systemd-timesyncd.service
 #output "Enabling mbpfan"
 #systemctl enable mbpfan.service
 
+# REMOVE BASH-related stuff in /etc/skel
+rm /etc/skel/.bash*
 
 # Meningless stuff. 
 touch /etc/skel/.hushlogin
@@ -473,7 +471,11 @@ cp install_log /mnt/root
 
 output "Cleaning up"
 
-rm /etc/skel/.bash*
+# This is a zsh-system remember
+rm /root/.bash*
+
+# Not that it matters, because we are disabling root
+passwd --lock root
 
 umount -R /mnt
 swapoff -a
