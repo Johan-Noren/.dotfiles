@@ -399,10 +399,11 @@ rm /etc/skel/.bash*
 
 # Meningless stuff. 
 touch /etc/skel/.hushlogin
+echo "# Check /etc/zshrc for system-wide settings" > /etc/skel/.zshrc
 
 output "Setting terminal defaults"
-touch /etc/skel/.zshrc
-tee -a /etc/skel/.zshrc << END
+touch /etc/zshrc
+tee -a /etc/zshrc << END
 ## HISTORY SETTINGS
 HISTFILE=~/.histfile
 HISTSIZE=1000
