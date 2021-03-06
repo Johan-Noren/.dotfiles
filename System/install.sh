@@ -423,14 +423,28 @@ alias ls='ls --color=auto'
 export PS1='
 %B%F{white}%d%f%b '
 
+export EDITOR=/bin/nvim
+export BROWSER=/bin/firefox
+export PATH=$PATH:~/.local/bin
+END
+
+touch /etc/profile.d/xkb.sh
+tee -a /etc/profile.d/xkb.sh << END
+#!/bin/sh
+#export XKB_DEFAULT_MODEL=""
+export XKB_DEFAULT_LAYOUT="se"
+export XKB_DEFAULT_VARIANT="mac"
+export XKB_DEFAULT_OPTIONS="compose:rwin"
+END
+
+touch /etc/profile.d/wayland.sh
+tee -a /etc/profile.d/wayland.sh << END
+#!/bin/sh
 export GDK_BACKEND=wayland
 export MOZ_ENABLE_WAYLAND=1
 export MOZ_USE_XINPUT2=1
 export QT_QPA_PLATFORM=wayland-egl
 export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
-export EDITOR=/bin/nvim
-export BROWSER=/bin/firefox
-export PATH=$PATH:~/.local/bin
 END
 
 
