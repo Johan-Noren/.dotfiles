@@ -404,28 +404,34 @@ touch /etc/skel/.hushlogin
 output "Setting terminal defaults"
 touch /etc/skel/.zshrc
 tee -a /etc/skel/.zshrc << END
+## HISTORY SETTINGS
 HISTFILE=~/.histfile
 HISTSIZE=1000
 SAVEHIST=1000
 
-bindkey -e
+## COMPLETION
 zstyle ':completion:*' use-ip true
 setopt NO_CASE_GLOB
 autoload -Uz compinit
 compinit
 
-# ALIASES
+# VIM-like mode
+bindkey -v
+
+## ALIASES
 alias vi='nvim '
 alias sudo='sudo '
 alias ls='ls --color=auto'
 
-# PROMPT
+## PROMPT
 export PS1='
 %B%F{white}%d%f%b '
 
+## EXPORTS
 export EDITOR=/bin/nvim
 export BROWSER=/bin/firefox
 export PATH=$PATH:~/.local/bin
+
 END
 
 touch /etc/profile.d/xkb.sh
@@ -454,6 +460,8 @@ useradd -m -G wheel,video -s /bin/bash $USERNAME
 echo -en "$USER_PASSWORD\n$USER_PASSWORD" | passwd $USERNAME
 chsh -s /bin/zsh $USERNAME
 
+# Also change shell for root
+chsh -s /bin/zsh root
 
 ## INLINE BOOTSTRAP SCRIPT ENDS HERE ##
 EOF
@@ -464,6 +472,9 @@ cp install_log /mnt/root
 
 
 output "Cleaning up"
+
+rm /etc/skel/.bash*
+
 umount -R /mnt
 swapoff -a
 
