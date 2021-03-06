@@ -56,14 +56,19 @@ INITRAMFS_BINARIES="btrfs"
 INITRAMFS_HOOKS="base systemd block autodetect modconf keyboard sd-vconsole sd-encrypt filesystems"
 
 # Graphic stuff
-GPU_DRIVERS="vulkan-intel intel-media-driver "
 LIBVA_ENVIRONMENT_VARIABLE="export LIBVA_DRIVER_NAME=iHD"
 
+# BASE BACKAGES
+BASE_PACKAGES="base base-devel linux linux-headers linux-firmware"
 
-# Sets packages to be installed
-SWAYWM="sway swaybg swayidle swaylock mako bemenu-wlroots alacritty udisks2 udiskie light mpv imv grim slurp wl-clipboard wf-recorder i3status-rust"
-PACKAGES="base base-devel linux linux-headers linux-firmware efibootmgr btrfs-progs e2fsprogs device-mapper $CPU_MICROCODE $GPU_DRIVERS $SWAYWM ffmpeg bluez reflector pipewire libpipewire02 libva-utils iwd zsh ufw cryptsetup openssh upower unzip unrar powertop ttf-dejavu xdg-user-dirs wget git man-db man-pages neovim firefox diffutils"
-AUR_PACKAGES="mbpfan-git "
+# SWAY PACKAGES
+SWAYWM_PACKAGES="sway swaybg swayidle swaylock mako bemenu-wlroots alacritty udisks2 udiskie light mpv imv grim slurp wl-clipboard wf-recorder i3status-rust"
+
+# PACKAGES
+PACKAGES="$BASE_PACKAGES $CPU_MICROCODE $SWAYWM_PACKAGES upower powertop efibootmgr vulkan-intel intel-media-driver ufw iwd git wget openssh ffmpeg libva-utils pipewire libpipewire02 btrfs-progs e2fsprogs device-mapper bluez reflector zsh cryptsetup unzip unrar ttf-dejavu ttf-font-awesome xdg-user-dirs wget git man-db man-pages neovim firefox diffutils"
+
+# PACKAGES FROM AUR. <NOT IMPLEMENTED YET>
+AUR_PACKAGES="mbpfan-git"
 
 output "Updating system clock"
 timedatectl set-ntp true
