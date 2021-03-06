@@ -62,7 +62,7 @@ LIBVA_ENVIRONMENT_VARIABLE="export LIBVA_DRIVER_NAME=iHD"
 
 # Sets packages to be installed
 SWAYWM="sway swaybg swayidle swaylock mako bemenu-wlroots alacritty udisks2 udiskie light mpv imv grim slurp wl-clipboard wf-recorder i3status-rust"
-PACKAGES="base base-devel linux linux-headers linux-firmware efibootmgr btrfs-progs e2fsprogs device-mapper $CPU_MICROCODE $GPU_DRIVERS $SWAYWM ffmpeg bluez pipewire libpipewire02 libva-utils iwd zsh ufw cryptsetup openssh upower unzip unrar powertop ttf-dejavu xdg-user-dirs wget git man-db man-pages neovim firefox diffutils"
+PACKAGES="base base-devel linux linux-headers linux-firmware efibootmgr btrfs-progs e2fsprogs device-mapper $CPU_MICROCODE $GPU_DRIVERS $SWAYWM ffmpeg bluez reflector pipewire libpipewire02 libva-utils iwd zsh ufw cryptsetup openssh upower unzip unrar powertop ttf-dejavu xdg-user-dirs wget git man-db man-pages neovim firefox diffutils"
 AUR_PACKAGES="mbpfan-git "
 
 output "Updating system clock"
@@ -70,7 +70,6 @@ timedatectl set-ntp true
 
 output "Syncing packages database"
 pacman -Sy --noconfirm
-
 
 ## SETTING UP DISKS ##
 output "Creating partitions"
