@@ -432,7 +432,7 @@ rm /etc/skel/.bash*
 
 # Meningless stuff. 
 touch /etc/skel/.hushlogin
-echo "# Check /etc/zshrc for system-wide settings" > /etc/skel/.zshrc
+echo "# Check /etc/zsh/zshrc for system-wide settings" > /etc/skel/.zshrc
 
 output "Setting terminal defaults"
 touch /etc/zsh/zshrc
@@ -484,7 +484,7 @@ END
 sed -i "s/bash/zsh/g" /etc/default/useradd
 
 output "Creating new user"
-useradd -m -G wheel,video -s /bin/bash $USERNAME
+useradd -m -G wheel,video $USERNAME
 echo -en "$USER_PASSWORD\n$USER_PASSWORD" | passwd $USERNAME
 #chsh -s /bin/zsh $USERNAME This shouldn't be needed
 
