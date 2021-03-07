@@ -65,7 +65,7 @@ BASE_PACKAGES="base base-devel linux linux-headers linux-firmware"
 SWAYWM_PACKAGES="sway swaybg swayidle swaylock mako bemenu-wlroots alacritty udisks2 udiskie light mpv imv grim slurp wl-clipboard wf-recorder i3status-rust"
 
 # PACKAGES
-PACKAGES="$BASE_PACKAGES $CPU_MICROCODE $SWAYWM_PACKAGES upower powertop efibootmgr vulkan-intel intel-media-driver ufw iwd git wget openssh ffmpeg libva-utils pipewire libpipewire02 btrfs-progs e2fsprogs device-mapper bluez reflector zsh cryptsetup unzip unrar ttf-dejavu ttf-font-awesome xdg-user-dirs wget git man-db man-pages neovim firefox diffutils"
+PACKAGES="$BASE_PACKAGES $CPU_MICROCODE $SWAYWM_PACKAGES upower powertop efibootmgr vulkan-intel intel-media-driver ufw iwd iw git wget openssh ffmpeg libva-utils pipewire libpipewire02 btrfs-progs e2fsprogs device-mapper bluez reflector zsh cryptsetup unzip unrar ttf-dejavu ttf-font-awesome capitaine-cursors xdg-user-dirs wget git man-db man-pages neovim firefox diffutils"
 
 # PACKAGES FROM AUR. <NOT IMPLEMENTED YET>
 AUR_PACKAGES="mbpfan-git"
