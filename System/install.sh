@@ -461,6 +461,46 @@ export BROWSER=/bin/firefox
 
 END
 
+echo "" > /etc/zsh/zprofile
+tee -a /etc/zsh/zprofile << END
+# /etc/zsh/zprofile
+
+# Set umask 022
+umask 022
+
+# PATH-appending function
+append_path () {
+    case ":$PATH:" in
+        *:"$1":*)
+            ;;
+        *)
+            PATH="${PATH:+$PATH:}$1"
+    esac
+}
+
+# Append our default paths
+append_path "/usr/local/sbin"
+append_path "/usr/local/bin"
+append_path "/usr/bin"
+append_path "~/.local/bin"
+
+# Reset PATH and store our new
+export PATH
+
+# Iterate through all files in /etc/profile.d/ and source them.
+if test -d /etc/profile.d/; then
+	for profile in /etc/profile.d/*.sh; do
+		test -r "$profile" && . "$profile"
+	done
+	unset profile
+fi
+
+unset TERMCAP
+unset MANPATH
+
+END
+
+
 touch /etc/profile.d/xkb.sh
 tee -a /etc/profile.d/xkb.sh << END
 #!/bin/sh
