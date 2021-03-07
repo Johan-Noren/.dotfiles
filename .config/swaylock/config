@@ -16,7 +16,7 @@ daemonize
 #no-unlock-indicator
 
 #Display the given image, optionally only on the given output. Use -c to set a background color. If the path potentially contains a ':', prefix it with another image [[<output>]:]<path>
-image=~/.bg.jpg
+image=~/.lock.png
 
 #Force displaying the current xkb layout while typing, even if only one layout is configured.
 #show-keyboard-layout
