@@ -366,11 +366,25 @@ vm.dirty_writeback_centisecs = 1500
 END
 
 
-output "Setting environment variables (and improve Java applications font rendering)"
-tee -a /etc/environment << END
-$LIBVA_ENVIRONMENT_VARIABLE
+output "Creating profile settings"
+touch /etc/profile.d/java_env.sh
+tee -a /etc/profile.d/java_env.sh << END
 export _JAVA_OPTIONS='-Dawt.useSystemAAFontSettings=gasp'
 export JAVA_FONTS=/usr/share/fonts/TTF
+END
+
+
+touch /etc/profile.d/libva.sh
+tee -a /etc/profile.d/libva.sh << END
+$LIBVA_ENVIRONMENT_VARIABLE
+END
+
+
+touch /etc/profile.d/alias.sh
+tee -a /etc/profile.d/alias.sh << END
+alias vi='nvim '
+alias sudo='sudo '
+alias ls='ls --color=auto'
 END
 
 
@@ -386,11 +400,9 @@ ufw default allow outgoing
 #systemctl enable thermald.service
 
 
-
-
-
 output "Enabling bluetooth"
 systemctl enable bluetooth.service
+
 
 output "Configuring network"
 mkdir -p /etc/iwd
@@ -403,11 +415,14 @@ EnableNetworkConfiguration=true
 NameResolvingService=systemd
 END
 
+
 output "Enabling systemd-resolved"
 systemctl enable systemd-resolved.service
 
+
 output "Enabling NTP"
 systemctl enable systemd-timesyncd.service
+
 
 #output "Enabling mbpfan"
 #systemctl enable mbpfan.service
@@ -436,11 +451,6 @@ compinit
 # VIM-like mode
 bindkey -v
 
-## ALIASES
-alias vi='nvim '
-alias sudo='sudo '
-alias ls='ls --color=auto'
-
 ## PROMPT
 export PS1='
 %B%F{white}%d%f%b '
@@ -448,7 +458,6 @@ export PS1='
 ## EXPORTS
 export EDITOR=/bin/nvim
 export BROWSER=/bin/firefox
-export PATH=$PATH:~/.local/bin
 
 END
 
@@ -471,12 +480,13 @@ export QT_QPA_PLATFORM=wayland-egl
 export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
 END
 
-
+# Make zsh default for new users
+sed -i "s/bash/zsh/g" /etc/default/useradd
 
 output "Creating new user"
 useradd -m -G wheel,video -s /bin/bash $USERNAME
 echo -en "$USER_PASSWORD\n$USER_PASSWORD" | passwd $USERNAME
-chsh -s /bin/zsh $USERNAME
+#chsh -s /bin/zsh $USERNAME This shouldn't be needed
 
 # Also change shell for root
 chsh -s /bin/zsh root
@@ -486,16 +496,14 @@ output "Installing yay"
 cd /tmp
 git clone https://aur.archlinux.org/yay-bin.git
 cd yay-bin
-su ${USERNAME} makepkg -si --noconfirm
+#su ${USERNAME} makepkg -si --noconfirm
 
-su ${USERNAME} yay -S --noconfirm ${AUR_PACKAGES}
+#su ${USERNAME} yay -S --noconfirm ${AUR_PACKAGES}
 
 
 # Not that it matters, because we are disabling root
 passwd --lock root
 
-# Make zsh default for new users
-sed -i "s/bash/zsh/g" /etc/default/useradd
 
 ## INLINE BOOTSTRAP SCRIPT ENDS HERE ##
 EOF
