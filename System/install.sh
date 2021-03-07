@@ -311,22 +311,24 @@ echo '%wheel ALL=(ALL) ALL' | EDITOR='tee -a' visudo
 
 # Make sure that screen is not cleared before login
 mkdir -p /etc/systemd/system/getty@tty1.service.d/
-touch /etc/systemd/system/getty@tty1.service.d/50-prevent_clearscreen_before_console.conf
-tee -a /etc/systemd/system/getty@tty1.service.d/50-prevent_clearscreen_before_console.conf << END
+touch /etc/systemd/system/getty@tty1.service.d/override.conf
+tee -a /etc/systemd/system/getty@tty1.service.d/override.conf << END
 [Service]
+ExecStart=
+ExecStart=-/usr/bin/agetty --skip-login --login-options "-f ${USERNAME} " %I 38400 linux
 TTYVTDisallocate=no
 END
 
-# Cursor on
-setterm -cursor on >> /etc/issue
+# Remov messages at startup
+echo "" > /etc/issue
 
 # Enable
 systemctl enable iwd
 
-#output "Installing yay"
-#cd /tmp
-#git clone https://aur.archlinux.org/yay-bin.git
-#cd yay-bin
+output "Installing yay"
+cd /tmp
+git clone https://aur.archlinux.org/yay-bin.git
+cd yay-bin
 #makepkg -si --noconfirm
 
 #output "Installing some additionall packages from AUR"
@@ -373,6 +375,9 @@ ufw default allow outgoing
 
 #output "Enabling thermald"
 #systemctl enable thermald.service
+
+
+
 
 
 output "Enabling bluetooth"
@@ -466,6 +471,15 @@ chsh -s /bin/zsh $USERNAME
 
 # Also change shell for root
 chsh -s /bin/zsh root
+
+
+output "Installing yay"
+cd /tmp
+git clone https://aur.archlinux.org/yay-bin.git
+cd yay-bin
+su ${USERNAME} makepkg -si --noconfirm
+
+su ${USERNAME} yay -S --noconfirm ${AUR_PACKAGES}
 
 ## INLINE BOOTSTRAP SCRIPT ENDS HERE ##
 EOF
