@@ -129,6 +129,15 @@ echo "LABEL=systemPartition /swap  btrfs  rw,noatime,ssd,space_cache,subvol=/swa
 
 
 ## CHROOTING TOOTHING PART ##
+
+ORANGE='\033[0;33m'
+NC='\033[0m' # No Color
+
+output() {
+       echo -e "${ORANGE} >>>   $1   <<<${NC}"
+       }
+
+
 output "Configuring new system"
 arch-chroot /mnt /bin/bash << EOF
 
@@ -411,8 +420,8 @@ touch /etc/skel/.hushlogin
 echo "# Check /etc/zshrc for system-wide settings" > /etc/skel/.zshrc
 
 output "Setting terminal defaults"
-touch /etc/zshrc
-tee -a /etc/zshrc << END
+touch /etc/zsh/zshrc
+tee -a /etc/zsh/zshrc << END
 ## HISTORY SETTINGS
 HISTFILE=~/.histfile
 HISTSIZE=1000
@@ -481,6 +490,13 @@ su ${USERNAME} makepkg -si --noconfirm
 
 su ${USERNAME} yay -S --noconfirm ${AUR_PACKAGES}
 
+
+# Not that it matters, because we are disabling root
+passwd --lock root
+
+# Make zsh default for new users
+sed -i "s/bash/zsh/g" /etc/default/useradd
+
 ## INLINE BOOTSTRAP SCRIPT ENDS HERE ##
 EOF
 
@@ -490,12 +506,6 @@ cp install_log /mnt/root
 
 
 output "Cleaning up"
-
-# This is a zsh-system remember
-rm /root/.bash*
-
-# Not that it matters, because we are disabling root
-passwd --lock root
 
 umount -R /mnt
 swapoff -a
