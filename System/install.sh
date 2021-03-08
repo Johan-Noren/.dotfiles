@@ -130,6 +130,10 @@ echo "LABEL=systemPartition /swap  btrfs  rw,noatime,ssd,space_cache,subvol=/swa
 
 ## CHROOTING TOOTHING PART ##
 
+output "Configuring new system"
+arch-chroot /mnt /bin/bash << EOF
+
+
 ORANGE='\033[0;33m'
 NC='\033[0m' # No Color
 
@@ -138,8 +142,6 @@ output() {
        }
 
 
-output "Configuring new system"
-arch-chroot /mnt /bin/bash << EOF
 
 output "Setting system clock"
 timedatectl set-timezone $CONTINENT_CITY
@@ -533,9 +535,9 @@ chsh -s /bin/zsh root
 
 
 output "Installing yay"
-cd /tmp
+cd /home/${USERNAME}
 git clone https://aur.archlinux.org/yay-bin.git
-cd yay-bin
+#cd yay-bin
 #su ${USERNAME} makepkg -si --noconfirm
 
 #su ${USERNAME} yay -S --noconfirm ${AUR_PACKAGES}
