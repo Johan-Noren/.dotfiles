@@ -128,13 +128,12 @@ genfstab -L -p /mnt >> /mnt/etc/fstab
 echo "LABEL=systemPartition /swap  btrfs  rw,noatime,ssd,space_cache,subvol=/swap,subvol=swap     0 0" >> /mnt/etc/fstab
 
 
-## CHROOTING TOOTHING PART ##
+## ####################### CHROOTING TOOTHING PART ## #######################
 
 output "Configuring new system"
 arch-chroot /mnt /bin/bash << EOF
 
 set -x
-
 
 ORANGE='\033[0;33m'
 NC='\033[0m' # No Color
@@ -304,21 +303,6 @@ output "Setting kernel to hush"
 echo "kernel.printk = 3 3 3 3" > /etc/sysctl.d/10-hush-kernel.conf
 
 
-output "Installing systemd services"
-touch /etc/systemd/system/disable_gpe4E.service
-tee -a /etc/systemd/system/disable_gpe4E.service << END
-[Unit]
-Description=the service that disables GPE 4E, an interrupt that is going crazy on Macs
-
-[Service]
-ExecStart=/usr/bin/bash -c 'echo "disable" > /sys/firmware/acpi/interrupts/gpe4E'
-
-[Install]
-WantedBy=multi-user.target
-END
-
-systemctl enable disable_gpe4E
-
 output "Adding user as a sudoer"
 echo '%wheel ALL=(ALL) ALL' | EDITOR='tee -a' visudo
 
@@ -332,8 +316,10 @@ ExecStart=-/usr/bin/agetty --skip-login --login-options "-f ${USERNAME} " %I 384
 TTYVTDisallocate=no
 END
 
+
 # Remov messages at startup
 echo "" > /etc/issue
+
 
 # Enable
 systemctl enable iwd
@@ -392,6 +378,26 @@ alias ls='ls --color=auto'
 END
 
 
+touch /etc/profile.d/xkb.sh
+tee -a /etc/profile.d/xkb.sh << END
+#!/bin/sh
+#export XKB_DEFAULT_MODEL=""
+export XKB_DEFAULT_LAYOUT="se"
+export XKB_DEFAULT_VARIANT="mac"
+export XKB_DEFAULT_OPTIONS="compose:rwin"
+END
+
+touch /etc/profile.d/wayland.sh
+tee -a /etc/profile.d/wayland.sh << END
+#!/bin/sh
+export GDK_BACKEND=wayland
+export MOZ_ENABLE_WAYLAND=1
+export MOZ_USE_XINPUT2=1
+export QT_QPA_PLATFORM=wayland-egl
+export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+END
+
+
 output "Installing and configuring UFW"
 systemctl enable ufw
 systemctl start ufw
@@ -403,6 +409,21 @@ ufw default allow outgoing
 #output "Enabling thermald"
 #systemctl enable thermald.service
 
+
+output "Installing systemd services"
+touch /etc/systemd/system/disable_gpe4E.service
+tee -a /etc/systemd/system/disable_gpe4E.service << END
+[Unit]
+Description=the service that disables GPE 4E, an interrupt that is going crazy on Macs
+
+[Service]
+ExecStart=/usr/bin/bash -c 'echo "disable" > /sys/firmware/acpi/interrupts/gpe4E'
+
+[Install]
+WantedBy=multi-user.target
+END
+
+systemctl enable disable_gpe4E
 
 output "Enabling bluetooth"
 systemctl enable bluetooth.service
@@ -455,21 +476,21 @@ END
 
 touch /etc/zsh/zshrc
 tee -a /etc/zsh/zshrc << END
-## HISTORY SETTINGS
+## Setting history settings
 HISTFILE=~/.histfile
 HISTSIZE=1000
 SAVEHIST=1000
 
-## COMPLETION
+## Completion related settings
 zstyle ':completion:*' use-ip true
 setopt NO_CASE_GLOB
 autoload -Uz compinit
 compinit
 
-# VIM-like mode
+# Enabling vim-like mode
 bindkey -v
 
-## PROMPT
+## Setting custom prompt 
 export PS1='
 %B%F{white}%d%f%b '
 
@@ -518,25 +539,6 @@ unset MANPATH
 
 END
 
-
-touch /etc/profile.d/xkb.sh
-tee -a /etc/profile.d/xkb.sh << END
-#!/bin/sh
-#export XKB_DEFAULT_MODEL=""
-export XKB_DEFAULT_LAYOUT="se"
-export XKB_DEFAULT_VARIANT="mac"
-export XKB_DEFAULT_OPTIONS="compose:rwin"
-END
-
-touch /etc/profile.d/wayland.sh
-tee -a /etc/profile.d/wayland.sh << END
-#!/bin/sh
-export GDK_BACKEND=wayland
-export MOZ_ENABLE_WAYLAND=1
-export MOZ_USE_XINPUT2=1
-export QT_QPA_PLATFORM=wayland-egl
-export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
-END
 
 # Make zsh default for new users
 sed -i "s/bash/zsh/g" /etc/default/useradd
