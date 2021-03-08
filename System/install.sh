@@ -370,24 +370,6 @@ $LIBVA_ENVIRONMENT_VARIABLE
 END
 
 
-touch /etc/profile.d/alias.sh
-tee -a /etc/profile.d/alias.sh << END
-
-# Neovim is the new vi
-alias vi='nvim '
-
-# Make sudo inherit from own shell
-alias sudo='sudo '
-
-# Colorize stuff
-alias grep='grep --color=auto'
-alias egrep='egrep --color=auto'
-alias ip='ip --color=auto'
-alias diff='diff --color=auto'
-alias ls='ls --color=auto'
-
-END
-
 touch /etc/profile.d/less.sh
 tee -a /etc/profile.d/less.sh << 'END'
 export LESS=-R
@@ -402,7 +384,6 @@ END
 
 touch /etc/profile.d/xkb.sh
 tee -a /etc/profile.d/xkb.sh << END
-#!/bin/sh
 #export XKB_DEFAULT_MODEL=""
 export XKB_DEFAULT_LAYOUT="se"
 export XKB_DEFAULT_VARIANT="mac"
@@ -411,12 +392,22 @@ END
 
 touch /etc/profile.d/wayland.sh
 tee -a /etc/profile.d/wayland.sh << END
-#!/bin/sh
 export GDK_BACKEND=wayland
 export MOZ_ENABLE_WAYLAND=1
 export MOZ_USE_XINPUT2=1
 export QT_QPA_PLATFORM=wayland-egl
 export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+END
+
+touch /etc/profile.d/default_editor.sh
+tee -a /etc/profile.d/default_editor.sh << END
+export EDITOR=/bin/nvim
+END
+
+
+touch /etc/profile.d/default_browser.sh
+tee -a /etc/profile.d/default_browser.sh << END
+export BROWSER=/bin/firefox
 END
 
 
@@ -477,9 +468,7 @@ rm /etc/skel/.bash*
 
 # Meningless stuff. 
 touch /etc/skel/.hushlogin
-echo "# Check /etc/zsh/zshrc for system-wide settings" > /etc/skel/.zshrc
-
-
+echo "# Check /etc/zsh/zshrc for system-wide settings. You can override those using this file" > /etc/skel/.zshrc
 
 output "Setting terminal defaults"
 touch /etc/zsh/zlogout
@@ -514,15 +503,26 @@ bindkey -v
 export PS1='
 %B%F{white}%d%f%b '
 
-## EXPORTS
-export EDITOR=/bin/nvim
-export BROWSER=/bin/firefox
+## Default aliases
+
+# Neovim is the new vi
+alias vi='nvim '
+
+# Make sudo inherit from own shell
+alias sudo='sudo '
+
+# Colorize stuff
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias ip='ip --color=auto'
+alias diff='diff --color=auto'
+alias ls='ls --color=auto'
 
 END
 
-echo "" > /etc/zsh/zprofile
-tee -a /etc/zsh/zprofile << 'END'
-# /etc/zsh/zprofile
+echo "" > /etc/zsh/zshenv
+tee -a /etc/zsh/zshenv << 'END'
+# /etc/zsh/zshenv
 
 # Set umask 022
 umask 022
