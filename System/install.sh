@@ -372,11 +372,33 @@ END
 
 touch /etc/profile.d/alias.sh
 tee -a /etc/profile.d/alias.sh << END
+
+# Neovim is the new vi
 alias vi='nvim '
+
+# Make sudo inherit from own shell
 alias sudo='sudo '
+
+# Colorize stuff
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias ip='ip --color=auto'
+alias diff='diff --color=auto'
 alias ls='ls --color=auto'
+
 END
 
+touch /etc/profile.d/less.sh
+tee -a /etc/profile.d/less.sh << 'END'
+export LESS=-R
+export LESS_TERMCAP_mb=\$'\E[1;31m'     # begin blink
+export LESS_TERMCAP_md=\$'\E[1;36m'     # begin bold
+export LESS_TERMCAP_me=\$'\E[0m'        # reset bold/blink
+export LESS_TERMCAP_so=\$'\E[01;44;33m' # begin reverse video
+export LESS_TERMCAP_se=\$'\E[0m'        # reset reverse video
+export LESS_TERMCAP_us=\$'\E[1;32m'     # begin underline
+export LESS_TERMCAP_ue=\$'\E[0m'        # reset underline
+END
 
 touch /etc/profile.d/xkb.sh
 tee -a /etc/profile.d/xkb.sh << END
@@ -405,10 +427,8 @@ ufw enable
 ufw default deny incoming
 ufw default allow outgoing
 
-
-#output "Enabling thermald"
-#systemctl enable thermald.service
-
+output "Colorizing pacman"
+sed -i "s/#Color/Color/g" /etc/pacman.conf
 
 output "Installing systemd services"
 touch /etc/systemd/system/disable_gpe4E.service
