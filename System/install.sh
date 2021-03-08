@@ -140,7 +140,7 @@ ORANGE='\033[0;33m'
 NC='\033[0m' # No Color
 
 output() {
-       echo -e "${ORANGE} >>>   $1   <<<${NC}"
+       echo -e "\${ORANGE} >>>   \$1   <<<\${NC}"
        }
 
 
@@ -443,13 +443,13 @@ echo "# Check /etc/zsh/zshrc for system-wide settings" > /etc/skel/.zshrc
 output "Setting terminal defaults"
 touch /etc/zsh/zlogout
 tee -a /etc/zsh/zlogout << END
-## Enable cursor on login
+# Disable cursor at logout
 setterm --cursor off
 END
 
 touch /etc/zsh/zlogin
 tee -a /etc/zsh/zlogin << END
-## Enable cursor on login
+# Enable cursor at login
 setterm --cursor on
 END
 
@@ -488,11 +488,11 @@ umask 022
 
 # PATH-appending function
 append_path () {
-    case ":$PATH:" in
-        *:"$1":*)
+    case ":\$PATH:" in
+        *:"\$1":*)
             ;;
         *)
-            PATH="${PATH:+$PATH:}$1"
+            PATH="\${PATH:+\$PATH:}\$1"
     esac
 }
 
@@ -508,7 +508,7 @@ export PATH
 # Iterate through all files in /etc/profile.d/ and source them.
 if test -d /etc/profile.d/; then
 	for profile in /etc/profile.d/*.sh; do
-		test -r "$profile" && . "$profile"
+		test -r "\$profile" && . "\$profile"
 	done
 	unset profile
 fi
