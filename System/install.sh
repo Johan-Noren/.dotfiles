@@ -26,14 +26,14 @@ output() {
 # iwctl station wlan0 connect <SSID>
 
 ## VARIABLES ##
-ENCRYPTION_PASSPHRASE="temp"
-ROOT_PASSWORD="lemp"
+ENCRYPTION_PASSPHRASE="changeme"
+ROOT_PASSWORD="changeme"
 
-USERNAME="testu"
-USER_PASSWORD="pemp"
+USERNAME="johan"
+USER_PASSWORD="changeme"
 
 # Misc settings
-HOSTNAME="hosty"
+HOSTNAME="nibiru"
 CONTINENT_CITY="Europe/Stockholm"
 
 # Install system to
