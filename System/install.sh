@@ -438,7 +438,21 @@ rm /etc/skel/.bash*
 touch /etc/skel/.hushlogin
 echo "# Check /etc/zsh/zshrc for system-wide settings" > /etc/skel/.zshrc
 
+
+
 output "Setting terminal defaults"
+touch /etc/zsh/zlogout
+tee -a /etc/zsh/zlogout << END
+## Enable cursor on login
+setterm --cursor off
+END
+
+touch /etc/zsh/zlogin
+tee -a /etc/zsh/zlogin << END
+## Enable cursor on login
+setterm --cursor on
+END
+
 touch /etc/zsh/zshrc
 tee -a /etc/zsh/zshrc << END
 ## HISTORY SETTINGS
@@ -466,7 +480,7 @@ export BROWSER=/bin/firefox
 END
 
 echo "" > /etc/zsh/zprofile
-tee -a /etc/zsh/zprofile << "END"
+tee -a /etc/zsh/zprofile << 'END'
 # /etc/zsh/zprofile
 
 # Set umask 022
