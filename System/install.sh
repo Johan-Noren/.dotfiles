@@ -478,6 +478,8 @@ tee -a /etc/zsh/zlogin << END
 setterm --cursor on
 END
 
+echo "# /etc/zsh/zprofile. This file is empty" > /etc/zsh/zprofile
+
 touch /etc/zsh/zshrc
 tee -a /etc/zsh/zshrc << END
 ## Setting history settings
