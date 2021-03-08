@@ -570,9 +570,7 @@ chsh -s /bin/zsh root
 output "Installing yay"
 cd /home/${USERNAME}
 git clone https://aur.archlinux.org/yay-bin.git
-#cd yay-bin
-#su ${USERNAME} makepkg -si --noconfirm
-
+chown johan:johan yay-bin -R
 #su ${USERNAME} yay -S --noconfirm ${AUR_PACKAGES}
 
 
