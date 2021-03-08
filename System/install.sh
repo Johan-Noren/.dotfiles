@@ -133,6 +133,8 @@ echo "LABEL=systemPartition /swap  btrfs  rw,noatime,ssd,space_cache,subvol=/swa
 output "Configuring new system"
 arch-chroot /mnt /bin/bash << EOF
 
+set -x
+
 
 ORANGE='\033[0;33m'
 NC='\033[0m' # No Color
@@ -464,7 +466,7 @@ export BROWSER=/bin/firefox
 END
 
 echo "" > /etc/zsh/zprofile
-tee -a /etc/zsh/zprofile << END
+tee -a /etc/zsh/zprofile << "END"
 # /etc/zsh/zprofile
 
 # Set umask 022
@@ -472,11 +474,11 @@ umask 022
 
 # PATH-appending function
 append_path () {
-    case ':$PATH:' in
-        *:'$1':*)
+    case ":$PATH:" in
+        *:"$1":*)
             ;;
         *)
-            PATH='${PATH:+$PATH:}$1'
+            PATH="${PATH:+$PATH:}$1"
     esac
 }
 
@@ -492,7 +494,7 @@ export PATH
 # Iterate through all files in /etc/profile.d/ and source them.
 if test -d /etc/profile.d/; then
 	for profile in /etc/profile.d/*.sh; do
-		test -r '$profile' && . '$profile'
+		test -r "$profile" && . "$profile"
 	done
 	unset profile
 fi
