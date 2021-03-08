@@ -17,4 +17,9 @@ done
 # Setup default wallpaper and lockscreen
 cd ~
 ln -s .dotfiles/Wallpapers/.bg.jpg
-ln -s .dotfiles/Wallpapers/.lock.png
+ln -s .dotfiles/Wallpapers/lock2.png .lock.png
+
+# Instructions for setting up git
+echo 'git config credential.helper store'
+echo 'git config --global user.email "<email>"'
+echo 'git config --global user.name  "<name>"'
