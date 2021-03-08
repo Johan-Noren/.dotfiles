@@ -321,17 +321,12 @@ END
 echo "" > /etc/issue
 
 
-# Enable
+# Enable iwd
 systemctl enable iwd
 
 output "Installing yay"
 cd /tmp
 git clone https://aur.archlinux.org/yay-bin.git
-cd yay-bin
-#makepkg -si --noconfirm
-
-#output "Installing some additionall packages from AUR"
-#yay -S --noconfirm $
 
 
 
