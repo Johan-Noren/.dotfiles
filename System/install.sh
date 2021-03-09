@@ -65,7 +65,7 @@ BASE_PACKAGES="base base-devel linux linux-headers linux-firmware"
 SWAYWM_PACKAGES="sway swaybg swayidle swaylock mako bemenu-wlroots alacritty udisks2 udiskie light mpv imv grim slurp wl-clipboard wf-recorder i3status-rust"
 
 # PACKAGES
-PACKAGES="$BASE_PACKAGES $CPU_MICROCODE $SWAYWM_PACKAGES upower powertop efibootmgr vulkan-intel intel-media-driver ufw iwd iw git wget openssh ffmpeg libva-utils pipewire libpipewire02 btrfs-progs e2fsprogs device-mapper bluez reflector zsh cryptsetup unzip unrar ttf-dejavu ttf-font-awesome capitaine-cursors xdg-user-dirs wget git man-db man-pages neovim firefox diffutils"
+PACKAGES="$BASE_PACKAGES $CPU_MICROCODE $SWAYWM_PACKAGES upower powertop efibootmgr vulkan-intel intel-media-driver ufw wpa_supplicant iw git wget openssh ffmpeg libva-utils pulseaudio-alsa btrfs-progs e2fsprogs device-mapper bluez reflector zsh cryptsetup unzip unrar ttf-dejavu ttf-font-awesome capitaine-cursors xdg-user-dirs wget git man-db man-pages neovim firefox diffutils"
 
 # PACKAGES FROM AUR. <NOT IMPLEMENTED YET>
 AUR_PACKAGES="mbpfan-git"
@@ -321,14 +321,6 @@ END
 echo "" > /etc/issue
 
 
-# Enable iwd
-systemctl enable iwd
-
-output "Installing yay"
-cd /tmp
-git clone https://aur.archlinux.org/yay-bin.git
-
-
 
 output "Enabling audio power saving features"
 touch /etc/modprobe.d/audio_powersave.conf
@@ -337,11 +329,11 @@ options snd_hda_intel power_save=1
 END
 
 
-output "Enabling wifi (iwlwifi) power saving features"
-touch /etc/modprobe.d/iwlwifi.conf
-tee -a /etc/modprobe.d/iwlwifi.conf << END
-options iwlwifi power_save=1 
-END
+#output "Enabling wifi (iwlwifi) power saving features"3
+#touch /etc/modprobe.d/iwlwifi.conf
+#tee -a /etc/modprobe.d/iwlwifi.conf << END
+#options iwlwifi power_save=1 
+#END
 
 
 output "Reducing VM writeback time"
