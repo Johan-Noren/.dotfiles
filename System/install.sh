@@ -320,21 +320,11 @@ END
 # Remov messages at startup
 echo "" > /etc/issue
 
-
-
 output "Enabling audio power saving features"
 touch /etc/modprobe.d/audio_powersave.conf
 tee -a /etc/modprobe.d/audio_powersave.conf << END
 options snd_hda_intel power_save=1
 END
-
-
-#output "Enabling wifi (iwlwifi) power saving features"3
-#touch /etc/modprobe.d/iwlwifi.conf
-#tee -a /etc/modprobe.d/iwlwifi.conf << END
-#options iwlwifi power_save=1 
-#END
-
 
 output "Reducing VM writeback time"
 touch /etc/sysctl.d/dirty.conf
@@ -486,7 +476,7 @@ autoload -Uz compinit
 compinit
 
 # Enabling vim-like mode
-bindkey -v
+bindkey -e
 
 ## Setting custom prompt 
 export PS1='
