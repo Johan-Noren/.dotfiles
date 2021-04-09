@@ -1,30 +1,28 @@
 pkgname=plymouth-theme-supersimple
-pkgver=0.2
+pkgver=0.3
 pkgrel=1
 pkgdesc="A supersimple theme stripped from everything except for encryption dialoge"
 arch=('i686' 'x86_64')
 license=('GPL')
 
-source=("https://gitlab.freedesktop.org/plymouth/plymouth/-/archive/0.9.5/plymouth-0.9.5.tar.gz")
-md5sums=('b077c2e4c49b2141fb862d38919bbc34')
+source=('bullet.png' 'capslock.png' 'entry.png' 'lock.png' 'supersimple.plymouth')
 
+md5sums=('ae4e88daaddec7ae4a2a997187866202'
+         '7c49b83bab57fa680699cb93835ba583'
+         'a20c9157084cf08e10f5f25e8fa1c1d8'
+         '66ee769b98e6985bdcd20c4ca719931c'
+         '3752f875eeb7a583ade480ba6d479307')
 
 package() {
 	
-	bgrt_dir="$srcdir/plymouth-0.9.5/themes/bgrt"
-	spinner_dir="$srcdir/plymouth-0.9.5/themes/spinner"
     new_theme_dir="$pkgdir/usr/share/plymouth/themes/supersimple"
 
     mkdir -p $new_theme_dir
-    install -Dm644 "$bgrt_dir/bgrt.plymouth.desktop" "$new_theme_dir/supersimple.plymouth"
-    install -Dm644 "$spinner_dir/bullet.png" "$new_theme_dir/bullet.png"
-    install -Dm644 "$spinner_dir/capslock.png" "$new_theme_dir/capslock.png"
-    install -Dm644 "$spinner_dir/lock.png" "$new_theme_dir/lock.png"
-    install -Dm644 "$spinner_dir/entry.png" "$new_theme_dir/entry.png"
+    install -Dm644 "supersimple.plymouth" "$new_theme_dir/supersimple.plymouth"
+    install -Dm644 "bullet.png" "$new_theme_dir/bullet.png"
+    install -Dm644 "capslock.png" "$new_theme_dir/capslock.png"
+    install -Dm644 "lock.png" "$new_theme_dir/lock.png"
+    install -Dm644 "entry.png" "$new_theme_dir/entry.png"
 
-    sed -i "s/Name=BGRT/Name=supersimple/g" $new_theme_dir/supersimple.plymouth
-    sed -i "s|ImageDir=@PLYMOUTH_THEME_PATH@/spinner|ImageDir=/usr/share/plymouth/themes/supersimple|g" $new_theme_dir/supersimple.plymouth
-    sed -i "s/MessageBelowAnimation=true/MessageBelowAnimation=false/g" $new_theme_dir/supersimple.plymouth
-    sed -i "/^Description/d" $new_theme_dir/supersimple.plymouth
 }
 
