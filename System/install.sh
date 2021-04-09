@@ -65,7 +65,11 @@ BASE_PACKAGES="base base-devel linux linux-headers linux-firmware"
 SWAYWM_PACKAGES="sway swaybg swayidle swaylock mako wpa_supplicant bemenu-wlroots alacritty udisks2 udiskie light mpv imv grim slurp wl-clipboard wf-recorder i3status-rust"
 
 # GNOME
+<<<<<<< HEAD
 GNOME_PACKAGES="gnome networkmanager gnome-tweaks wl_clipboard"
+=======
+GNOME_PACKAGES="gnome networkmanager gnome-tweaks wl-clipboard "
+>>>>>>> 84d0568a6808270db7bcad7fdfd47538d92423ae
 
 # UNCOMMENT ONE
 #VM="$GNOME_PACKGES"
@@ -484,7 +488,7 @@ setopt NO_CASE_GLOB
 autoload -Uz compinit
 compinit
 
-# Enabling vim-like mode
+# Enabling emacs-like mode
 bindkey -e
 
 ## Setting custom prompt 
