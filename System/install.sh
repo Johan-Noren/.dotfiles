@@ -62,17 +62,17 @@ LIBVA_ENVIRONMENT_VARIABLE="export LIBVA_DRIVER_NAME=iHD"
 BASE_PACKAGES="base base-devel linux linux-headers linux-firmware"
 
 # SWAY PACKAGES
-SWAYWM_PACKAGES="sway swaybg swayidle swaylock mako bemenu-wlroots alacritty udisks2 udiskie light mpv imv grim slurp wl-clipboard wf-recorder i3status-rust"
+SWAYWM_PACKAGES="sway swaybg swayidle swaylock mako wpa_supplicant bemenu-wlroots alacritty udisks2 udiskie light mpv imv grim slurp wl-clipboard wf-recorder i3status-rust"
 
 # GNOME
-GNOME_PACKAGES="gnome networkmanager gnome-tweaks"
+GNOME_PACKAGES="gnome networkmanager gnome-tweaks wl_clipboard"
 
 # UNCOMMENT ONE
 #VM="$GNOME_PACKGES"
 #VM="$SWAYWM_PACKAGES"
 
 # PACKAGES
-PACKAGES="$BASE_PACKAGES $CPU_MICROCODE $VM powertop efibootmgr vulkan-intel intel-media-driver ufw wpa_supplicant iw git wget openssh ffmpeg libva-utils pulseaudio-alsa btrfs-progs e2fsprogs device-mapper bluez reflector zsh cryptsetup unzip unrar ttf-dejavu ttf-font-awesome capitaine-cursors xdg-user-dirs wget git man-db man-pages neovim firefox diffutils"
+PACKAGES="$BASE_PACKAGES $CPU_MICROCODE $VM powertop iw efibootmgr vulkan-intel intel-media-driver ufw git wget openssh ffmpeg libva-utils pulseaudio-alsa btrfs-progs e2fsprogs device-mapper bluez reflector zsh cryptsetup unzip unrar ttf-dejavu ttf-font-awesome capitaine-cursors xdg-user-dirs wget git man-db man-pages neovim firefox diffutils"
 
 # PACKAGES FROM AUR. <NOT IMPLEMENTED YET>
 AUR_PACKAGES="mbpfan-git"
@@ -435,6 +435,8 @@ EnableNetworkConfiguration=true
 NameResolvingService=systemd
 END
 
+
+systemctl enable NetworkManager
 
 output "Enabling systemd-resolved"
 systemctl enable systemd-resolved.service
