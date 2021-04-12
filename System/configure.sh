@@ -9,7 +9,14 @@ makepkg -sri
 PACKAGES="mbpfan-git plymouth-git firefox-decentraleyes firefox-extension-cookie-autodelete firefox-extension-privacybadger firefox-ublock-origin"
 
 yay -S --noconfirm ${PACKAGES}
- 
+
+
+# Activates
+sudo systemctl enable --now  mbpfan-git
+
+
+
+
 
 #
 # GNOME SETTINGS
