@@ -1,0 +1,13 @@
+# settings
+
+(GimpGegl-gegl-cell-noise-config "2021-04-13 14:47:45"
+    (time 1618318065)
+    (gimp-mode normal)
+    (scale 1)
+    (shape 2)
+    (rank 1)
+    (iterations 1)
+    (palettize no)
+    (seed 2070793749))
+
+# end of settings
