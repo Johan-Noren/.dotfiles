@@ -1,23 +1,23 @@
-#/bin/sh
+#/bin/zsh
 
 # Symlink .config-folders
-mkdir -p ~/.config
-cd ~/.config
-for x in ~/.dotfiles/.config/*; do
+mkdir -p $HOME/.config
+cd $HOME/.config
+for x in $HOME/.dotfiles/.config/*; do
   ln -s $x 
 done
 
 # Symlink .local
-mkdir -p ~/.local
-cd ~/.local
-for x in ~/.dotfiles/.local/*; do
+mkdir -p $HOME/.local
+cd $HOME/.local
+for x in $HOME/.dotfiles/.local/*; do
   ln -s $x 
 done
 
 # Setup default wallpaper and lockscreen
-cd ~
-ln -s .dotfiles/Wallpapers/.bg.jpg
-ln -s .dotfiles/Wallpapers/lock2.png .lock.png
+cd $HOME
+ln -s Pictures/Wallpapers/.bg.jpg
+ln -s Pictures/Wallpapers/lock2.png .lock.png
 
 # Instructions for setting up git
 echo 'git config credential.helper store'
