@@ -1,8 +1,6 @@
-#!/bin/sh
+#!/bin/zsh
 
-#WIFI_INTERFACE=$(cat /proc/net/wireless | tail -n +3 | cut -d ":" -f1)
-#WIFI_INTERFACE="wlp0s20u2" #"wlp3s0"
-WIFI_INTERFACE="wlan0"
+WIFI_INTERFACE=$(cat /proc/net/wireless | tail -n +3 | cut -d ":" -f1 | cut -d " " -f 2)
 
 _AND_="    "
 

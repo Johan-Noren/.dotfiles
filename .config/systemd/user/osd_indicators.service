@@ -6,7 +6,7 @@ PartOf=graphical-session.target
 [Service]
 Type=simple
 
-ExecStart=/bin/sh -c '/home/johan/.local/bin/wob.sh'
+ExecStart=/bin/zsh -c "%h/.local/bin/osd_indicators.zsh"
 
 
 #ExecStartPre=/usr/bin/mkfifo /home/f161/.cache/wobpipe

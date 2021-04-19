@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 
 wob_pipe=~/.cache/wobpipe
 

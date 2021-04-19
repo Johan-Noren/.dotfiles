@@ -1,0 +1,12 @@
+[Unit]
+Description=JupyterLab
+
+[Service]
+Type=simple
+PIDFile=/run/jupyterlab.pid
+ExecStart=/usr/bin/jupyter-lab --notebook-dir=%h/Build --no-browser
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

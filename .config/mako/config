@@ -1,33 +1,30 @@
 font= DejaVu Sans 11
-border-size=3
+border-size=1
 padding=20
 margin=20,20
 height=400
 width=400
 layer=overlay
 
-background-color=#1e1e1e
-text-color=#a7a7a7
+background-color=#2d2d2d
+border-color=#272727
+text-color=#d3d0c8
 default-timeout=5000
 
 [urgency=low]
-border-color=#00000000
+background-color=#1e1e1e
+border-color=#4f5a60
+text-color=#cf6a4c
 
 [urgency=normal]
-border-color=#8f9d6a
+background-color=#1e1e1e
+border-color=#4f5a60
+text-color=#cf6a4c
 
 [urgency=high]
-border-color=#cf6a4c
-
-[category="osd"]
-background-color=#ebdbb2
-text-color=#282828
-default-timeout=3000
-
-[category="checkupdates"]
-background-color=#ebdbb2
-text-color=#282828
-default-timeout=30000
+background-color=#f2777a
+text-color=#2d2d2d
+default-timeout=0
 
 [app-name="Signal"]
 background-color=#ebdbb2
