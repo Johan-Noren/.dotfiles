@@ -5,6 +5,8 @@ margin=20,20
 height=400
 width=400
 layer=overlay
+format=<b>%s</b>\n\n%b
+icons=0
 
 background-color=#2d2d2d
 border-color=#272727
