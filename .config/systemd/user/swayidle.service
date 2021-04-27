@@ -6,7 +6,7 @@ PartOf=graphical-session.target
 [Service]
 Type=simple
 ExecStart=/usr/bin/swayidle -w \
-                    timeout 180 'dim_light.zsh' resume 'light -I' \
+                    timeout 180 '%h/.local/bin/dim_light.zsh' resume 'light -I' \
                     timeout 360 'swaylock -f' \
                     timeout 420 'swaymsg output * dpms off' resume 'swaymsg output * dpms on' \
                     timeout 900 'systemctl suspend' \

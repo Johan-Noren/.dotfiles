@@ -11,11 +11,11 @@ else
 fi
 
 
-echo "CURRENT_VALUE: $CURRENT_VALUE, STARTING_POINT=$STARTING_POINT, END_POINT=$END_POINT"
+#echo "CURRENT_VALUE: $CURRENT_VALUE, STARTING_POINT=$STARTING_POINT, END_POINT=$END_POINT" | systemd-cat -t dim_light.zsh
 
 
 if [[ "$STARTING_POINT" -le "$END_POINT" ]]; then
-	echo "Nothing to do here"
+#	echo "New value is alread equels to or less than existing value" | systemd-cat -t dim_light.zsh
 	exit 1
 
 else
@@ -29,3 +29,4 @@ else
 	done
 
 fi
+
