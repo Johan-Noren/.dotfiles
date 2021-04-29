@@ -27,6 +27,7 @@ gsettings set org.gnome.mutter experimental-features "['scale-monitor-framebuffe
 gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
 gsettings set org.gnome.mutter center-new-windows "true"
 gsettings set org.gnome.mutter dynamic-workspaces "false"
+gsettings set org.gnome.desktop.wm.preferences focus-mode 'mouse'
 gsettings set org.gnome.desktop.wm.preferences num-workspaces 4
 
 # Remove these keybindings. cus' they sux
@@ -53,7 +54,8 @@ gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-3 "['<Super>3
 gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-4 "['<Super>4']"
 gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-left "['<Super>h']"
 gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-right "['<Super>l']"
-
+# ADD FULLSCREEN
+# 
 
 #
 # Dotfiles
